@@ -303,12 +303,14 @@
             <h1 id="（扩展）卡尔曼滤波学习参考"><a href="#（扩展）卡尔曼滤波学习参考" class="headerlink" title="（扩展）卡尔曼滤波学习参考"></a>（扩展）卡尔曼滤波学习参考</h1><p>斜抛运动（网球，羽毛球)等轨迹与落点预测需要用到扩展卡尔曼滤波<br>这里记录一下自己学习所参考的网站<br>以及一些总结</p>
 <h2 id="直观理解"><a href="#直观理解" class="headerlink" title="直观理解"></a>直观理解</h2><p>一开始根本知道卡尔曼滤波是干什么，所以这两个介绍给了一些直观的解释</p>
 <p>1.作者截取于某教材的航海例子：<br>            <a href="https://www.cnblogs.com/rainbow70626/p/10786413.html" target="_blank" rel="noopener">https://www.cnblogs.com/rainbow70626/p/10786413.html</a></p>
-<p>2.比较容易理解的的一个一维的例子：<br>            <a href="https://blog.csdn.net/phker/article/details/48468591" target="_blank" rel="noopener">https://blog.csdn.net/phker/article/details/48468591</a></p>
-<p>3.辅助理解（还没来得及看）：<br>            <a href="http://shequ.dimianzhan.com/articles/337/extended-kalman-filter-course-from-shallow-to-deep" target="_blank" rel="noopener">http://shequ.dimianzhan.com/articles/337/extended-kalman-filter-course-from-shallow-to-deep</a></p>
-<h2 id="简单实现"><a href="#简单实现" class="headerlink" title="简单实现"></a>简单实现</h2><p>有了直观的理解，下一步就开始进一步的看一些例子以及对公式的理解。<br>    对公式的理解维基百科介绍的很详细：<br>    <a href="https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2</a></p>
+<p>2.比较容易理解的的一个一维关于温度的例子：<br>            <a href="https://blog.csdn.net/phker/article/details/48468591" target="_blank" rel="noopener">https://blog.csdn.net/phker/article/details/48468591</a></p>
+<p>3.辅助理解：<br>            <a href="http://shequ.dimianzhan.com/articles/337/extended-kalman-filter-course-from-shallow-to-deep" target="_blank" rel="noopener">http://shequ.dimianzhan.com/articles/337/extended-kalman-filter-course-from-shallow-to-deep</a></p>
+<h2 id="简单实现"><a href="#简单实现" class="headerlink" title="简单实现"></a>简单实现</h2><p>有了直观的理解，下一步就开始进一步的看一些例子以及对公式的理解。<br>对公式的理解维基百科介绍的很详细：<br> <a href="https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2</a></p>
 <p>这是一个python例子（可直接翻译网页）<a href="https://satomacoto.blogspot.com/2011/06/python_22.html：" target="_blank" rel="noopener">https://satomacoto.blogspot.com/2011/06/python_22.html：</a></p>
-<h2 id="深刻理解"><a href="#深刻理解" class="headerlink" title="深刻理解"></a>深刻理解</h2><p>更深刻的理解就需要阅读一些论文和教材了，这部分我也没有读，就不写了</p>
-
+<h2 id="我的理解"><a href="#我的理解" class="headerlink" title="我的理解"></a>我的理解</h2><h3 id="基于直观大白话的理解"><a href="#基于直观大白话的理解" class="headerlink" title="基于直观大白话的理解"></a>基于直观大白话的理解</h3><pre><code>我们用传感器（如直尺去测量长度，双目相机去定位）去测量一个变量（有规律运动的小车的位置）会得到一个数据，但由于直尺的质量或者相机的畸变等，我们的传感器会有误差。 另外，因为变量的变化是有规律的，所以我们可以从理论建模的角度（如高中的运动学公式）得到位置的预测，同理由于我们理论预测的时候忽略了一些变量或者噪声，所以得到的结果也是不准确的。卡尔曼滤波器就是基于这两个不准确的值以及两个误差。来给出最接近真实值的一个预测。</code></pre><h3 id="基于维基百科的公式"><a href="#基于维基百科的公式" class="headerlink" title="基于维基百科的公式"></a>基于维基百科的公式</h3><pre><code>在读完温度记的那个例子后，再看这两个公式</code></pre><p><img src="image/kalman03.png" alt><br><img src="image/kalman04.png" alt> </p>
+<p>我就有个疑问，X<sub>k</sub>是预测值（对应那个经验温度），Z<sub>k</sub>是观测值（对应温度计读书），这两个值怎么会有关系。后来再读一遍发现不对，X<sub>k</sub>是实际值，不是预测值，预测值是不含误差项W<sub>k</sub>的，下面的第一个公式才是预测值，而H<sub>k</sub>之所以被称为观测矩阵，是因为它会把非观测值去掉，如维基百科给的那个例子，乘完H后，只剩下位置项，而速度是预测值所以在观测值Z<sub>k</sub>中该项为0。</p>
+<p><img src="image/kalman01.png" alt><br>另外对于几个协方差和卡尔曼增益的理解可参考维基百科给出的链接<br><a href="http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf" target="_blank" rel="noopener">http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf</a><br><img src="image/kalman02.png" alt><br>注意,这里K<sub>k</sub>实际上是个分式，如下所示<br>这里讲的和第一部分直观理解中第三个参考文献类似，可参考理解<br><img src="image/kalman05.png" alt></p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><pre><code>扩展卡尔曼滤波是针对非线性过程，但预测过程相同只不过求了个Jacobi行列式在更新时把非线性过程线性化处理，等用到再进一步整理</code></pre>
           
         
       
