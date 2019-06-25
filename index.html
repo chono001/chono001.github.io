@@ -229,6 +229,126 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/视觉杂记/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/24/视觉杂记/" itemprop="url">视觉杂记</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-24T19:27:34+08:00">
+                2019-06-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>OpenCV里 RGB 图像里存储颜色顺序其实是BGR</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/20/zed立体相机使用/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -302,10 +422,14 @@
           
             <h1 id="zed立体相机-pyhon-opencv"><a href="#zed立体相机-pyhon-opencv" class="headerlink" title="zed立体相机+pyhon+opencv"></a>zed立体相机+pyhon+opencv</h1><p>zed相机网上资料都是关于安装的教程，后续的一些使用介绍的不是很多，<br>因为官方文档已经介绍的很详细，这里介绍一下自己的学习过程，以备查阅，如有错误，敬请指正。<br>这时官方文档，所有的信息都是根据这儿得来的。<br><a href="https://www.stereolabs.com/" target="_blank" rel="noopener">https://www.stereolabs.com/</a></p>
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>因为zed相机属于UVC（USB video device class ）设备，索引可以用作双目摄像头直接用于计算机或者嵌入式平台，和普通的双目摄像头应该没什么区别。<br>但是如果要使用其SDK，就需要cuda环境。一开始不知道，打算用在台式机（Intel HD Graphics 4600集成显卡）上，后来发现需要NVIDIA。只好转用我的T470（总算能干点活了）。按照这个教程下来，基本没问题。<br><a href="https://blog.csdn.net/weixin_42132223/article/details/81840520" target="_blank" rel="noopener">https://blog.csdn.net/weixin_42132223/article/details/81840520</a></p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>安装后在程序里面搜索zed,会发现多出几个应用。可以都打开看看（别忘了把zed相机插上）。其中zed viewer就是拍摄的图像，左下角可以看到可以录视频照相。但录的视频是SVO格式的。里面包含了很多信息。包括深度，点云什么的，所以会非常大。depth viewer可以看深度图像和点云。ZED calibratiuon是做标定的很方便，不用自己搞棋盘，直接拿摄像头去怼显示前上的该应用给的棋盘就行。先看一下教程不是很难。还有一个ZEDFu我没用到。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>安装后在程序里面搜索zed,会发现多出几个应用。可以都打开看看（别忘了把zed相机插上）。其中zed viewer就是拍摄的图像，左下角可以看到可以录视频照相。但录的视频是SVO格式的。里面包含了很多信息。包括深度，点云什么的，所以会非常大。depth viewer可以看深度图像和点云。ZED calibratiuon是做标定的很方便，不用自己搞棋盘，直接拿摄像头去怼显示前上的该应用给的棋盘就行，这里建议用大一点的显示器。先看一下教程不是很难。还有一个ZEDFu我没用到。</p>
 <p>以上的这些应用只能让我们看到ZED的一些功能。用来做开发，自然少不了SDK.花一个小时把这个文档大概看一些。基本上就可以上手开发了。<br><a href="https://www.stereolabs.com/docs/getting-started/" target="_blank" rel="noopener">https://www.stereolabs.com/docs/getting-started/</a></p>
 <h2 id="方便参考的一些点"><a href="#方便参考的一些点" class="headerlink" title="方便参考的一些点"></a>方便参考的一些点</h2><p>zed相机比较方便的一个点是，做实时分析的时候不用随时都要插着摄像头，可以先录制好获得svo文件，然后用grab()函数直接得到的就是矫正后的图像，当然也可以参考给的opnecv例程进行图像，视频还有点云文件的保存。</p>
-<p>因为我要识别网球。很小，距离也很远。一开始打算用点云去做，滤波后提取满足条件的聚类。但PCL库没接触过。后来看到这篇文章<br><a href="https://support.stereolabs.com/hc/en-us/articles/360011977594-Can-I-get-the-3D-position-of-a-Custom-Object-a-Ball-or-a-Small-Object-" target="_blank" rel="noopener">https://support.stereolabs.com/hc/en-us/articles/360011977594-Can-I-get-the-3D-position-of-a-Custom-Object-a-Ball-or-a-Small-Object-</a><br>我在深度图中也看不到飞行的网球，zed开发人员也不建议直接用从深度图中去找。深度图是立体矫正匹配后得到的。于是我直接从矫正后的图像中去找两个球的对应点，得到视差。最后计算出深度图。</p>
+<p>因为我要识别网球。很小，距离也很远。一开始打算用点云去做，滤波后提取满足条件的聚类。但PCL库没接触过。后来看到这篇文章<br><a href="https://support.stereolabs.com/hc/en-us/articles/360011977594-Can-I-get-the-3D-position-of-a-Custom-Object-a-Ball-or-a-Small-Object-" target="_blank" rel="noopener">https://support.stereolabs.com/hc/en-us/articles/360011977594-Can-I-get-the-3D-position-of-a-Custom-Object-a-Ball-or-a-Small-Object-</a><br>我在深度图中也看不到飞行的网球，zed开发人员也不建议直接用从深度图中去找。深度图是立体矫正匹配后得到的。于是我直接从矫正后的图像中去找两个球的对应点，得到视差。最后计算出三维坐标值。</p>
+<h2 id="zed录像保存为svo文件的问题"><a href="#zed录像保存为svo文件的问题" class="headerlink" title="zed录像保存为svo文件的问题"></a>zed录像保存为svo文件的问题</h2><p>因为我需要的帧率比较高，而且在关键时刻需要稳定，但是得到的svo文件打开时（需要SDK），发现帧率一直在变化，而且某些帧率变得很低，不太清楚为什么。一下是我录制是的代码。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> pyzed.sl <span class="keyword">as</span> sl</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a ZEDCamera object</span></span><br><span class="line">zed = sl.Camera()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a InitParameters object and set configuration parameters</span></span><br><span class="line">init_params = sl.InitParameters()</span><br><span class="line">init_params.camera_resolution = sl.RESOLUTION.RESOLUTION_HD720  <span class="comment">#分辨率设置</span></span><br><span class="line">init_params.camera_fps = <span class="number">60</span>                                     <span class="comment">#帧率设置</span></span><br><span class="line"></span><br><span class="line">err = zed.open(init_params)</span><br><span class="line"><span class="keyword">if</span> err != sl.ERROR_CODE.SUCCESS:</span><br><span class="line">    exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">runtime_parameters = sl.RuntimeParameters()</span><br><span class="line">runtime_parameters.sensing_mode = sl.SENSING_MODE.SENSING_MODE_STANDARD  <span class="comment"># Use STANDARD sensing mode</span></span><br><span class="line"><span class="comment"># Enable recording with the filename specified in argument</span></span><br><span class="line">err = zed.enable_recording(<span class="string">'video_frame_test.svo'</span>, sl.SVO_COMPRESSION_MODE.SVO_COMPRESSION_MODE_LOSSLESS)</span><br><span class="line">image_zed = sl.Mat(zed.get_resolution().width, zed.get_resolution().height, sl.MAT_TYPE.MAT_TYPE_8U_C4)</span><br><span class="line">point_cloud = sl.Mat()</span><br><span class="line"></span><br><span class="line">print(<span class="string">'SVO is Recording'</span>)</span><br><span class="line">n=<span class="number">200</span></span><br><span class="line">pretimestamp=<span class="number">0</span></span><br><span class="line">dif_time =[]</span><br><span class="line"><span class="keyword">while</span> n&gt;<span class="number">0</span>:</span><br><span class="line">    <span class="keyword">if</span> zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS :</span><br><span class="line">        <span class="comment"># Each new frame is added to the SVO file</span></span><br><span class="line">        zed.record()</span><br><span class="line">        zed.retrieve_image(image_zed, sl.VIEW.VIEW_LEFT)</span><br><span class="line">        timestamp = zed.get_timestamp(sl.TIME_REFERENCE.TIME_REFERENCE_CURRENT)  <span class="comment"># Get the timestamp at the time the image was captured</span></span><br><span class="line">        diftimestamp = timestamp - pretimestamp<span class="comment">#时间戳之差</span></span><br><span class="line">        pretimestamp = timestamp<span class="comment">#上一帧时间戳</span></span><br><span class="line">        <span class="comment">#n = n-1</span></span><br><span class="line">        print(diftimestamp)</span><br><span class="line">        dif_time.append(diftimestamp)<span class="comment">#保存于一个列表</span></span><br><span class="line">        <span class="comment">#print(n)</span></span><br><span class="line"><span class="comment">#    else:</span></span><br><span class="line"><span class="comment">#         key =cv2.waitKey(1)</span></span><br><span class="line"><span class="comment">#         print('jump.')</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Disable recording</span></span><br><span class="line">zed.disable_recording()</span><br><span class="line">zed.close()</span><br></pre></td></tr></table></figure>
+
+<p>这里要实名表扬zed的技术支持。发送了询问邮件很快就得到了恢复。最终找到了问题所在。<br>因为我在thinkpad T470P上使用的该摄像头。技术支持说可能是因为GeForce 940MX不支持在最大帧率下工作。后来我进行了一些实验。发现在720P下，设置为15帧和30帧基本上不会有掉帧。但在60帧时就比较严重。所以我猜想可能是因为这个问题。另外，在720p时，即使调用SDK也不能设置任意帧数，好像只有，15，30，60三个选项。</p>
 
           
         
@@ -1137,7 +1261,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">8</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
