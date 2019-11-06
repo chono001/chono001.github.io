@@ -82,7 +82,7 @@
     </div>
     
         <div id="toc" class="toc-article">
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#配置使用"><span class="toc-text">配置使用</span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#配置使用"><span class="toc-text">配置使用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误"><span class="toc-text">该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误</span></a></li></ol>
 </div>
     
 </div>
@@ -130,6 +130,8 @@
 <p>首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单</p>
 <p>下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此<br>刚开始根据read me操作第二步生成样例工程就遇到了问题，如下图所示：<br><img src="image/%E5%B0%8F%E8%A7%85%E7%9B%B8%E6%9C%BA.png" alt><br>显示could not find any instance of Visual Studio.<br>经过一番折腾，发现之前用的是2019版的visual studio社区版，用visual studio installer卸载后，安装17版即可，如下图所示：<br><img src="image/visual_studio1.png" alt><br>在可用一栏可以选择不同版本。<br>在已安装一栏，选择“使用c++的桌面开发”.即可安装所需要的组件。</p>
 <h2 id="配置使用"><a href="#配置使用" class="headerlink" title="配置使用"></a>配置使用</h2><p><a href="https://slightech.github.io/MYNT-EYE-D-SDK/vs2017.html" target="_blank" rel="noopener">https://slightech.github.io/MYNT-EYE-D-SDK/vs2017.html</a><br>按照这个工程样例，一步一步进行操作即可</p>
+<h2 id="该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误"><a href="#该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误" class="headerlink" title="该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误"></a>该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误</h2><p>LNK2019    无法解析的外部符号 “void __cdecl cv::imshow。。。。。。。。</p>
+<p>这种情况是因为debug库的问题<br><a href="https://blog.csdn.net/pengyouyou/article/details/83958181" target="_blank" rel="noopener">https://blog.csdn.net/pengyouyou/article/details/83958181</a><br>按照该方法在链接 -&gt; 输入 -&gt; 中除了opencv_world341.lib,再加入opencv_world341d.lib即可解决</p>
 
         
         <br>

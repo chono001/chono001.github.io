@@ -11,7 +11,7 @@
 
     <title>
         
-        
+        c++常用代码段 - undefined
         
     </title>
 
@@ -53,7 +53,7 @@
     </div>
     <div class="contents" id="nav-content">
         <ul>
-            <li class="active">
+            <li>
                 <a href="/">
                     <i class="iconfont icon-shouye1"></i>
                     <span>HOME</span>
@@ -81,6 +81,10 @@
         </ul>
     </div>
     
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#c-c-计时函数-clock"><span class="toc-text">c/c++计时函数 clock()</span></a></li></ol>
+</div>
+    
 </div>
 
 
@@ -105,87 +109,41 @@
     <div class="index-middle">
         <!-- Main Content -->
         
-<div class="post-preview-container" style="min-height: 720px">
-    
-    <div class="post-preview">
-        <div class="post-time">2019-06-17</div>
-        <div class="post-info">
-            <a href="/2019/06/17/视频处理常用python代码组/">
-                <h3>
-                    视频处理常用python代码段
-                </h3>
-            </a>
-            <p>
-                
-            </p>
-        </div>
+
+
+<div class="post-container">
+    <div class="post-title">
+        c++常用代码段
     </div>
-    
-    <div class="post-preview">
-        <div class="post-time">2019-06-13</div>
-        <div class="post-info">
-            <a href="/2019/06/13/（扩展）卡尔曼滤波学习参考/">
-                <h3>
-                    （扩展）卡尔曼滤波学习参考
-                </h3>
-            </a>
-            <p>
-                
-            </p>
-        </div>
+
+    <div class="post-meta">
+        <span class="attr">Post：<span>2019-09-20 08:57:43</span></span>
+        
+        
+        <span class="attr">Visit：<span id="busuanzi_value_page_pv"></span>
+</span>
+
     </div>
-    
-    <div class="post-preview">
-        <div class="post-time">2019-06-10</div>
-        <div class="post-info">
-            <a href="/2019/06/10/VS code& markdown/">
-                <h3>
-                    VS code&amp; markdown
-                </h3>
-            </a>
-            <p>
-                
-            </p>
+    <div class="post-content ">
+        <hr>
+<h2 id="c-c-计时函数-clock"><a href="#c-c-计时函数-clock" class="headerlink" title="c/c++计时函数 clock()"></a>c/c++计时函数 clock()</h2><p>在 #include&lt;time.h&gt;中，有个计时函数clock(),其返回的输出类型为clock_t类型。返回从“开启这个程序进程”到“程序中调用clock()函数”时 之间的CPU时钟计时单元（clock tick）数。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">clock_t</span> currentime;<span class="comment">//整数</span></span><br><span class="line">currentime = clock();<span class="comment">//返回当前程序运行计时单元数。</span></span><br></pre></td></tr></table></figure>
+
+<p>在time.h文件中，还定义了一个常量CLOCKS_PER_SEC，它用来表示一秒钟会有多少个时钟计时单元，其定义如下：</p>
+<p>  #define CLOCKS_PER_SEC ((clock_t)1000) </p>
+<p> 可以看到可以看到每过千分之一秒（1毫秒）， 调用clock（）函数返回的值就加1。即可以认为该clock()函数返回的时间单位是毫秒。</p>
+
+        
+        <br>
+        <div id="comment-container">
         </div>
-    </div>
-    
-    <div class="post-preview">
-        <div class="post-time">2019-06-09</div>
-        <div class="post-info">
-            <a href="/2019/06/09/博客建立参考/">
-                <h3>
-                    博客建立参考
-                </h3>
-            </a>
-            <p>
-                
-            </p>
+        <div id="disqus_thread"></div>
+
+        <div id="lv-container">
         </div>
+
     </div>
-    
-    <div class="post-preview">
-        <div class="post-time">2019-06-09</div>
-        <div class="post-info">
-            <a href="/2019/06/09/hello-world/">
-                <h3>
-                    Hello World
-                </h3>
-            </a>
-            <p>
-                
-            </p>
-        </div>
-    </div>
-    
 </div>
-<ul class="pager">
-    
-    <li class="previous">
-        <a href="/">&larr; Newer Posts</a>
-    </li>
-    
-    
-</ul>
 
     </div>
 </div>
@@ -225,7 +183,7 @@
     // We expose some of the variables needed by the front end
     window.hexo_search_path = ""
     window.hexo_root = "/"
-    window.isPost = false
+    window.isPost = true
 </script>
 <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 <script src="/js/index.js"></script>
