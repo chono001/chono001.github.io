@@ -229,6 +229,261 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/11/gazebo建立双目相机模型/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/11/gazebo建立双目相机模型/" itemprop="url">gazebo中加入一个双目相机</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-11T22:49:40+08:00">
+                2019-12-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>##kinect<br>为了在gazebo中观察并利用利用视觉进行小球的定位并与ros通信，我们需要一个深度相机，这时可以直接使用kinect并加入插件与ros通信,gazebo官方也为我们提供了这个方法<br><a href="http://gazebosim.org/tutorials/?tut=ros_depth_camera" target="_blank" rel="noopener">http://gazebosim.org/tutorials/?tut=ros_depth_camera</a><br>直接将Kinect的模型文件下载在</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;sensor&gt;</span><br><span class="line">....</span><br><span class="line">&lt;/camera&gt;</span><br><span class="line">在此处添加插件代码即可</span><br><span class="line">&lt;/sendor&gt;</span><br></pre></td></tr></table></figure>
+
+<p>但有时，我们需要得到左右目两张图像，这是，我们就需要一个双目相机模型。</p>
+<p>##双目相机<br>方法类似，我们可以继续使用kinect的外观，使用一个Muticamera插件，<br><a href="http://gazebosim.org/tutorials?tut=ros_gzplugins" target="_blank" rel="noopener">http://gazebosim.org/tutorials?tut=ros_gzplugins</a><br>这时只需要将上述文件的sensor部分替换为官方给出的sensor部分的代码即可。这时在rqt_image_view中可以看到left和right两张图像</p>
+<p>##注意：以上两种修改sdf文件的方法不要忘记修改模型文件夹名字，sdf文件中的model名字，以及config文件中的model名</p>
+<p>###显示<br>首选，用rosrun gazebo_ros gazebo命令打开gazebo之后，在新的终端输入rostopic list,我们可以看到左右目的话题都在发布，主要是以下两个话题，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/multisense_sl/camera/left/image_raw</span><br><span class="line">/multisense_sl/camera/left/image_raw</span><br></pre></td></tr></table></figure>
+
+<p>我们的目的是订阅这两个话题并显示，我们先尝试订阅一个话题</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#订阅gazebo中双目相机左目的图像并显示</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> message_filters</span><br><span class="line"><span class="keyword">from</span> cv_bridge <span class="keyword">import</span> CvBridge, CvBridgeError</span><br><span class="line"><span class="keyword">from</span> sensor_msgs.msg <span class="keyword">import</span> Image</span><br><span class="line"><span class="comment">#ros传感器和opencv中的图像类型转换</span></span><br><span class="line">bridge = CvBridge()</span><br><span class="line"><span class="comment">#回调函数</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(left_ros_image)</span>:</span></span><br><span class="line">    left_cv_image = bridge.imgmsg_to_cv2(left_ros_image)</span><br><span class="line">    cv2.imshow(<span class="string">'left_image'</span>,left_cv_image)</span><br><span class="line">    key =cv2.waitKey(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment">#初始化节点</span></span><br><span class="line">    rospy.init_node(<span class="string">'gazebo_image_sub'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    <span class="comment">#订阅左目图像</span></span><br><span class="line">    left_ros_image = rospy.Subscriber(<span class="string">"/multisense_sl/camera/left/image_raw"</span>, Image,callback)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
+
+<p>ok,接下来我们显示双目图像，我们这里用到ros的一个message_filter的包，里面有一个Time Synchronizer，可以将接收到的信息进行同步。<br><a href="https://wiki.ros.org/message_filters#Time_Synchronizer" target="_blank" rel="noopener">https://wiki.ros.org/message_filters#Time_Synchronizer</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#订阅gazebo中双目相机的图像并显示</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> message_filters</span><br><span class="line"><span class="keyword">from</span> cv_bridge <span class="keyword">import</span> CvBridge, CvBridgeError</span><br><span class="line"><span class="keyword">from</span> sensor_msgs.msg <span class="keyword">import</span> Image</span><br><span class="line"></span><br><span class="line">bridge = CvBridge()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(left_ros_image,right_ros_image)</span>:</span></span><br><span class="line">    left_cv_image = bridge.imgmsg_to_cv2(left_ros_image)</span><br><span class="line">    right_cv_image = bridge.imgmsg_to_cv2(right_ros_image)</span><br><span class="line">    cv2.imshow(<span class="string">'left_image'</span>,left_cv_image)</span><br><span class="line">    cv2.imshow(<span class="string">'right_image'</span>,right_cv_image)</span><br><span class="line">    key =cv2.waitKey(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    rospy.init_node(<span class="string">'gazebo_image_sub'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    left_ros_image = message_filters.Subscriber(<span class="string">"/multisense_sl/camera/left/image_raw"</span>, Image)</span><br><span class="line">    right_ros_image =message_filters.Subscriber(<span class="string">"/multisense_sl/camera/right/image_raw"</span>, Image)</span><br><span class="line">    ts = message_filters.TimeSynchronizer([left_ros_image , right_ros_image], <span class="number">10</span>)</span><br><span class="line">    ts.registerCallback(callback)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/10/ros在同一节点同时订阅和发布消息/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/10/ros在同一节点同时订阅和发布消息/" itemprop="url">ros在同一节点同时订阅和发布消息</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-10T17:21:49+08:00">
+                2019-12-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#方法一，采用类的方法<br>参考网站<br><a href="https://blog.csdn.net/ethan_guo/article/details/80226121" target="_blank" rel="noopener">https://blog.csdn.net/ethan_guo/article/details/80226121</a></p>
+<p>#方法二，全局变量<br>作者这里只介绍了c++采用类的方法，下面介绍一下Python中用全局变量的方法实现</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/07/gazebo发球实现/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1207,253 +1462,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/14/小觅摄像头深度120版/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/14/小觅摄像头深度120版/" itemprop="url">小觅双目摄像头使用</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-14T17:08:35+08:00">
-                2019-07-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>##安装</p>
-<p>小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。<br>但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气</p>
-<p>首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单</p>
-<p>下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此<br>刚开始根据read me操作第二步生成样例工程就遇到了问题，如下图所示：<br><img src="image/%E5%B0%8F%E8%A7%85%E7%9B%B8%E6%9C%BA.png" alt><br>显示could not find any instance of Visual Studio.<br>经过一番折腾，发现之前用的是2019版的visual studio社区版，用visual studio installer卸载后，安装17版即可，如下图所示：<br><img src="image/visual_studio1.png" alt><br>在可用一栏可以选择不同版本。<br>在已安装一栏，选择“使用c++的桌面开发”.即可安装所需要的组件。</p>
-<h2 id="配置使用"><a href="#配置使用" class="headerlink" title="配置使用"></a>配置使用</h2><p><a href="https://slightech.github.io/MYNT-EYE-D-SDK/vs2017.html" target="_blank" rel="noopener">https://slightech.github.io/MYNT-EYE-D-SDK/vs2017.html</a><br>按照这个工程样例，一步一步进行操作即可</p>
-<h2 id="该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误"><a href="#该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误" class="headerlink" title="该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误"></a>该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误</h2><p>LNK2019    无法解析的外部符号 “void __cdecl cv::imshow。。。。。。。。</p>
-<p>这种情况是因为debug库的问题<br><a href="https://blog.csdn.net/pengyouyou/article/details/83958181" target="_blank" rel="noopener">https://blog.csdn.net/pengyouyou/article/details/83958181</a><br>按照该方法在链接 -&gt; 输入 -&gt; 中除了opencv_world341.lib,再加入opencv_world341d.lib即可解决</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/27/处理器_cache/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/27/处理器_cache/" itemprop="url">处理器——cache结构</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-27T10:41:17+08:00">
-                2019-06-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在内存到cache的映射中，index指的是cache的地址而tag是高位，由于内存容量比cache大而产生的。</p>
-<p>问题1：对于32位的地址，tag+index+block_words(块中字数)+word_bytes(自种字节偏移)中，所能表示的地址也只有2^32个。那么，上G的内存是如何分配的？上T的硬盘呢？</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1504,7 +1512,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-count">20</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
