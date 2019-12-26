@@ -79,19 +79,19 @@
 
 
 
-<meta name="description" content="##安装 小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气 首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单 下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此刚开始根据read me操作第二步">
+<meta name="description" content="安装小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气 首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单 下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此刚开始根据read me操作第二步生成样">
 <meta property="og:type" content="article">
 <meta property="og:title" content="小觅双目摄像头使用">
 <meta property="og:url" content="http://yoursite.com/2019/07/14/小觅摄像头深度120版/index.html">
 <meta property="og:site_name" content="chono challenge">
-<meta property="og:description" content="##安装 小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气 首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单 下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此刚开始根据read me操作第二步">
+<meta property="og:description" content="安装小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气 首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单 下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此刚开始根据read me操作第二步生成样">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2019/07/14/小觅摄像头深度120版/image/%E5%B0%8F%E8%A7%85%E7%9B%B8%E6%9C%BA.png">
 <meta property="og:image" content="http://yoursite.com/2019/07/14/小觅摄像头深度120版/image/visual_studio1.png">
-<meta property="og:updated_time" content="2019-08-19T10:53:25.384Z">
+<meta property="og:updated_time" content="2019-12-22T09:13:09.702Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="小觅双目摄像头使用">
-<meta name="twitter:description" content="##安装 小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气 首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单 下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此刚开始根据read me操作第二步">
+<meta name="twitter:description" content="安装小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气 首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单 下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此刚开始根据read me操作第二步生成样">
 <meta name="twitter:image" content="http://yoursite.com/2019/07/14/小觅摄像头深度120版/image/%E5%B0%8F%E8%A7%85%E7%9B%B8%E6%9C%BA.png">
 
 
@@ -302,8 +302,7 @@
       
 
       
-        <p>##安装</p>
-<p>小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。<br>但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气</p>
+        <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>小觅深度版相较于zed相机，内部集成计算芯片，不再需要显卡支持。<br>但sdk使用起来资料并不多，而且c++用的又比较少，因此，用起来看来要费不少力气</p>
 <p>首先第一关下载sdk,根据说明利用get_image.exe显示图像比较简单</p>
 <p>下一步就是涉及到使用cmake和visual studio.visual studio之前接触过，可cmake是干啥的都不知道，因此<br>刚开始根据read me操作第二步生成样例工程就遇到了问题，如下图所示：<br><img src="image/%E5%B0%8F%E8%A7%85%E7%9B%B8%E6%9C%BA.png" alt><br>显示could not find any instance of Visual Studio.<br>经过一番折腾，发现之前用的是2019版的visual studio社区版，用visual studio installer卸载后，安装17版即可，如下图所示：<br><img src="image/visual_studio1.png" alt><br>在可用一栏可以选择不同版本。<br>在已安装一栏，选择“使用c++的桌面开发”.即可安装所需要的组件。</p>
 <h2 id="配置使用"><a href="#配置使用" class="headerlink" title="配置使用"></a>配置使用</h2><p><a href="https://slightech.github.io/MYNT-EYE-D-SDK/vs2017.html" target="_blank" rel="noopener">https://slightech.github.io/MYNT-EYE-D-SDK/vs2017.html</a><br>按照这个工程样例，一步一步进行操作即可</p>
@@ -422,7 +421,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -459,7 +458,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置使用"><span class="nav-number">1.</span> <span class="nav-text">配置使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误"><span class="nav-number">2.</span> <span class="nav-text">该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置使用"><span class="nav-number">2.</span> <span class="nav-text">配置使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误"><span class="nav-number">3.</span> <span class="nav-text">该方法运行时采用的是release模式，若改为debug模式，可能会出现链接错误</span></a></li></ol></div>
             
 
           </div>

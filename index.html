@@ -229,6 +229,133 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/13/gazebo中实现双目相机定位/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/13/gazebo中实现双目相机定位/" itemprop="url">利用gazebo中的立体相机进行定位</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-13T20:08:34+08:00">
+                2019-12-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>上一篇文章介绍了如何建立双目相机模型及其参数。接下来利用这个双目相机进行物体的定位。在使用立体相机进行定位时，我们需要以下几个参数：<br>1.相机焦距 :flength                                                 单位：pixel(像素）<br>2.两个相机的距离即基线：baseline                   单位：m(米)<br>3.图像的大小(分辨率)：height x width               单位：pixel(像素）<br>    —理想相机中点坐标分别为cx = wigth/2,cy = height/2<br>4.我们定位的点在左右目中的图像定位的点是（xl,yl),(xr,yr)(单位：pixel(像素）)</p>
+<p>其中，前3个参数在相机固定时就已经是定值（当然对于有畸变的相机，需要相机实际的焦距和中心点cx,xy)。第四个参数需要我们用图像处理的方法得到（后面会涉及）。由以上参数我们就可以得到以下计算相机的深度depth和x,y的位置（相对于左目）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#立体位置计算</span></span><br><span class="line">disparity = abs(xl- xr)</span><br><span class="line">depth =   (flength * baseline)/(disparity)</span><br><span class="line">x =  ((xl - cx) * baseline)/(disparity)</span><br><span class="line">y = (( yl - cy) * baseline)/(disparity)</span><br></pre></td></tr></table></figure>
+
+<p>这里只是给出结果，具体的原理分析需要作图分析，后面再写篇文章，网上也有很多相关的介绍和教材可以参考。</p>
+<h2 id="定位算法"><a href="#定位算法" class="headerlink" title="定位算法"></a>定位算法</h2><p>这里来用一个测试程序来说明结果的正确性，主要由以下步骤。<br>1.rosrun gazebo_ros gazebo 打开gazeo<br>2.将上篇文章提到的立体相机模型手动放到原点位置，然后在镜头前不远处放入一个小球，这里我用的模型库里的RoboCup_SPL_Ball,然后打开rqt_image_view查看是否有小球，并查看是否在左右相机中小球视角发生变化。<br>3.订阅相机发布的图像，处理得到左右目中小球球心的位置，计算（x,y,depth）<br>4.与gazebo中小球的位置对比（一个格子1m可以直接对比）。<br>以下是python实现</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment">#利用获取的双目图像进行定位</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> message_filters</span><br><span class="line"><span class="keyword">from</span> cv_bridge <span class="keyword">import</span> CvBridge, CvBridgeError</span><br><span class="line"><span class="keyword">from</span> sensor_msgs.msg <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> math <span class="comment">#计算正切</span></span><br><span class="line"></span><br><span class="line">bridge = CvBridge()</span><br><span class="line">hfov = <span class="number">1.3962634</span></span><br><span class="line">image_width = <span class="number">800</span></span><br><span class="line">flength = (image_width/<span class="number">2</span>) / ( math.tan(hfov/<span class="number">2</span>) )</span><br><span class="line">base_line = <span class="number">0.2</span></span><br><span class="line">cx = <span class="number">400</span></span><br><span class="line">cy = <span class="number">400</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(left_ros_image,right_ros_image)</span>:</span></span><br><span class="line">    <span class="keyword">global</span> flength</span><br><span class="line">    <span class="keyword">global</span> cx </span><br><span class="line">    <span class="keyword">global</span> cy</span><br><span class="line"></span><br><span class="line">    left_cv_image = bridge.imgmsg_to_cv2(left_ros_image)</span><br><span class="line">    right_cv_image = bridge.imgmsg_to_cv2(right_ros_image)</span><br><span class="line">    <span class="comment">#图像处理获取参考点图像坐标</span></span><br><span class="line">    grayl = cv2.cvtColor(left_cv_image, cv2.COLOR_BGR2GRAY) <span class="comment">#灰度化</span></span><br><span class="line">    grayr = cv2.cvtColor(right_cv_image, cv2.COLOR_BGR2GRAY)</span><br><span class="line">    ret1l,andMaskBil = cv2.threshold(grayl, <span class="number">100</span>, <span class="number">255</span>, cv2.THRESH_BINARY_INV); <span class="comment">#进行阈值操作,这里针对其颜色做了一个反转_INV</span></span><br><span class="line">    ret1r,andMaskBir = cv2.threshold(grayr, <span class="number">100</span>, <span class="number">255</span>, cv2.THRESH_BINARY_INV); </span><br><span class="line">            </span><br><span class="line">    ret2l,contoursl, hierarchyl = cv2.findContours(andMaskBil.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)<span class="comment">#轮廓查找注意此算法当背景为白色物体为黑色时，可能使得最后的轮廓只有边框</span></span><br><span class="line">    ret2r,contoursr, hierarchyr = cv2.findContours(andMaskBir.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)</span><br><span class="line"></span><br><span class="line">    cntl = contoursl[<span class="number">0</span>] <span class="comment">#取该条轮廓,默认图像中只有一个轮廓，所以视野中只放一个小球</span></span><br><span class="line">    Ml = cv2.moments(cntl)<span class="comment">#计算轮廓的矩</span></span><br><span class="line">    cxl_f=((Ml[<span class="string">'m10'</span>]/Ml[<span class="string">'m00'</span>])) <span class="comment">#浮点数表示的质心横坐标  </span></span><br><span class="line">    cyl_f=((Ml[<span class="string">'m01'</span>]/Ml[<span class="string">'m00'</span>])) <span class="comment">#浮点数表示的质心纵坐标</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    cntr = contoursr[<span class="number">0</span>] <span class="comment">#取该条轮廓</span></span><br><span class="line">    Mr = cv2.moments(cntr)<span class="comment">#计算轮廓的矩</span></span><br><span class="line">    cxr_f=((Mr[<span class="string">'m10'</span>]/Mr[<span class="string">'m00'</span>])) <span class="comment">#浮点数表示的质心横坐标 </span></span><br><span class="line">    cyr_f=((Mr[<span class="string">'m01'</span>]/Mr[<span class="string">'m00'</span>])) <span class="comment">#浮点数表示的质心纵坐标</span></span><br><span class="line">   </span><br><span class="line">    disparity = abs(cxl_f - cxr_f)</span><br><span class="line">    depth =   (flength * base_line)/(disparity)</span><br><span class="line">    x =  ((cxl_f - cx) * base_line)/(disparity)</span><br><span class="line">    y = (( cyl_f - cy) * base_line)/(disparity)</span><br><span class="line">    print(x)</span><br><span class="line">    print(y)</span><br><span class="line">    print(depth)</span><br><span class="line">   <span class="comment">#图像显示</span></span><br><span class="line">    cv2.imshow(<span class="string">'left_image'</span>,left_cv_image)</span><br><span class="line">    cv2.imshow(<span class="string">'andMaskBil'</span>,andMaskBil)</span><br><span class="line">    key =cv2.waitKey(<span class="number">30</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    rospy.init_node(<span class="string">'gazebo_image_sub'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    left_ros_image = message_filters.Subscriber(<span class="string">"/multisense_sl/camera/left/image_raw"</span>, Image)</span><br><span class="line">    right_ros_image =message_filters.Subscriber(<span class="string">"/multisense_sl/camera/right/image_raw"</span>, Image)</span><br><span class="line">    ts = message_filters.TimeSynchronizer([left_ros_image , right_ros_image], <span class="number">10</span>)</span><br><span class="line">    ts.registerCallback(callback)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/11/gazebo建立双目相机模型/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -300,22 +427,22 @@
       
         
           
-            <p>##kinect<br>为了在gazebo中观察并利用利用视觉进行小球的定位并与ros通信，我们需要一个深度相机，这时可以直接使用kinect并加入插件与ros通信,gazebo官方也为我们提供了这个方法<br><a href="http://gazebosim.org/tutorials/?tut=ros_depth_camera" target="_blank" rel="noopener">http://gazebosim.org/tutorials/?tut=ros_depth_camera</a><br>直接将Kinect的模型文件下载在</p>
+            <h2 id="kinect"><a href="#kinect" class="headerlink" title="kinect"></a>kinect</h2><p>为了在gazebo中观察并利用利用视觉进行小球的定位并与ros通信，我们需要一个深度相机，这时可以直接使用kinect并加入插件与ros通信,gazebo官方也为我们提供了这个方法<br><a href="http://gazebosim.org/tutorials/?tut=ros_depth_camera" target="_blank" rel="noopener">http://gazebosim.org/tutorials/?tut=ros_depth_camera</a><br>直接将Kinect的模型文件下载在</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;sensor&gt;</span><br><span class="line">....</span><br><span class="line">&lt;/camera&gt;</span><br><span class="line">在此处添加插件代码即可</span><br><span class="line">&lt;/sendor&gt;</span><br></pre></td></tr></table></figure>
 
 <p>但有时，我们需要得到左右目两张图像，这是，我们就需要一个双目相机模型。</p>
 <p>##双目相机<br>方法类似，我们可以继续使用kinect的外观，使用一个Muticamera插件，<br><a href="http://gazebosim.org/tutorials?tut=ros_gzplugins" target="_blank" rel="noopener">http://gazebosim.org/tutorials?tut=ros_gzplugins</a><br>这时只需要将上述文件的sensor部分替换为官方给出的sensor部分的代码即可。这时在rqt_image_view中可以看到left和right两张图像</p>
-<p>##注意：以上两种修改sdf文件的方法不要忘记修改模型文件夹名字，sdf文件中的model名字，以及config文件中的model名</p>
-<p>###显示<br>首选，用rosrun gazebo_ros gazebo命令打开gazebo之后，在新的终端输入rostopic list,我们可以看到左右目的话题都在发布，主要是以下两个话题，</p>
+<h4 id="注意：以上两种修改sdf文件的方法不要忘记修改模型文件夹名字，sdf文件中的model名字，以及config文件中的model名"><a href="#注意：以上两种修改sdf文件的方法不要忘记修改模型文件夹名字，sdf文件中的model名字，以及config文件中的model名" class="headerlink" title="注意：以上两种修改sdf文件的方法不要忘记修改模型文件夹名字，sdf文件中的model名字，以及config文件中的model名"></a>注意：以上两种修改sdf文件的方法不要忘记修改模型文件夹名字，sdf文件中的model名字，以及config文件中的model名</h4><h3 id="显示"><a href="#显示" class="headerlink" title="显示"></a>显示</h3><p>首选，用rosrun gazebo_ros gazebo命令打开gazebo之后，在新的终端输入rostopic list,我们可以看到左右目的话题都在发布，主要是以下两个话题，</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/multisense_sl/camera/left/image_raw</span><br><span class="line">/multisense_sl/camera/left/image_raw</span><br></pre></td></tr></table></figure>
 
 <p>我们的目的是订阅这两个话题并显示，我们先尝试订阅一个话题</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#订阅gazebo中双目相机左目的图像并显示</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> message_filters</span><br><span class="line"><span class="keyword">from</span> cv_bridge <span class="keyword">import</span> CvBridge, CvBridgeError</span><br><span class="line"><span class="keyword">from</span> sensor_msgs.msg <span class="keyword">import</span> Image</span><br><span class="line"><span class="comment">#ros传感器和opencv中的图像类型转换</span></span><br><span class="line">bridge = CvBridge()</span><br><span class="line"><span class="comment">#回调函数</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(left_ros_image)</span>:</span></span><br><span class="line">    left_cv_image = bridge.imgmsg_to_cv2(left_ros_image)</span><br><span class="line">    cv2.imshow(<span class="string">'left_image'</span>,left_cv_image)</span><br><span class="line">    key =cv2.waitKey(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment">#初始化节点</span></span><br><span class="line">    rospy.init_node(<span class="string">'gazebo_image_sub'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    <span class="comment">#订阅左目图像</span></span><br><span class="line">    left_ros_image = rospy.Subscriber(<span class="string">"/multisense_sl/camera/left/image_raw"</span>, Image,callback)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
 
 <p>ok,接下来我们显示双目图像，我们这里用到ros的一个message_filter的包，里面有一个Time Synchronizer，可以将接收到的信息进行同步。<br><a href="https://wiki.ros.org/message_filters#Time_Synchronizer" target="_blank" rel="noopener">https://wiki.ros.org/message_filters#Time_Synchronizer</a></p>
+<p>191217补充：采用这种方式发现程序经常运行一会儿就会卡住，后来发现是cv2.imshow()的问题，将其注释掉，就不会卡住了。具体原因还没找到。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#订阅gazebo中双目相机的图像并显示</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> message_filters</span><br><span class="line"><span class="keyword">from</span> cv_bridge <span class="keyword">import</span> CvBridge, CvBridgeError</span><br><span class="line"><span class="keyword">from</span> sensor_msgs.msg <span class="keyword">import</span> Image</span><br><span class="line"></span><br><span class="line">bridge = CvBridge()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(left_ros_image,right_ros_image)</span>:</span></span><br><span class="line">    left_cv_image = bridge.imgmsg_to_cv2(left_ros_image)</span><br><span class="line">    right_cv_image = bridge.imgmsg_to_cv2(right_ros_image)</span><br><span class="line">    cv2.imshow(<span class="string">'left_image'</span>,left_cv_image)</span><br><span class="line">    cv2.imshow(<span class="string">'right_image'</span>,right_cv_image)</span><br><span class="line">    key =cv2.waitKey(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    rospy.init_node(<span class="string">'gazebo_image_sub'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    left_ros_image = message_filters.Subscriber(<span class="string">"/multisense_sl/camera/left/image_raw"</span>, Image)</span><br><span class="line">    right_ros_image =message_filters.Subscriber(<span class="string">"/multisense_sl/camera/right/image_raw"</span>, Image)</span><br><span class="line">    ts = message_filters.TimeSynchronizer([left_ros_image , right_ros_image], <span class="number">10</span>)</span><br><span class="line">    ts.registerCallback(callback)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
 
-<p>##插件参数<br>ok,现在我们想试一下这个立体相机能不能工作，我们需要知道我们到底对这个相机做了什么。介绍这部分之前，可以先看看有关相机镜头畸变和矫正相关的内容。这里在代码中对其进行注释。以下是整个立体相机的module.sdf文件。</p>
+<h2 id="插件参数"><a href="#插件参数" class="headerlink" title="插件参数"></a>插件参数</h2><p>ok,现在我们想试一下这个立体相机能不能工作，我们需要知道我们到底对这个相机做了什么。介绍这部分之前，可以先看看有关相机镜头畸变和矫正相关的内容。这里在代码中对其进行注释。以下是整个立体相机的module.sdf文件。</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" ?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">sdf</span> <span class="attr">version</span>=<span class="string">"1.5"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">model</span> <span class="attr">name</span>=<span class="string">"Stere_camera"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">static</span>&gt;</span>True<span class="tag">&lt;/<span class="name">static</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">pose</span>&gt;</span>0 0 0.2 0 0 3.14<span class="tag">&lt;/<span class="name">pose</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>开始module标签定义了模型的名字，pose标签指定初始位置，这里我理解的是相对于gazebo中的世界坐标系。static可省略，这里让其为True是想让相机不借助其他模型悬浮在空中。</p>
@@ -324,7 +451,8 @@
 <p>以上主要是三个标签，inertial中定义了模型质量（但由于我们将static设置为True这里相机将不受重力影响）。collision定义其物理属性，指的是在和其他物体碰撞时，以geometry中的属性进行碰撞。而visual标签中的geometry是指视觉效果。（我目前的理解是这样，如果visual中定以为球，而collision中定义为正方体，给这个物体一个力他会滑动，而不是滚动。因为collison中定义的是物理形状，而visual只是视觉形状）</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">sensor</span> <span class="attr">type</span>=<span class="string">"multicamera"</span> <span class="attr">name</span>=<span class="string">"stereo_camera"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">update_rate</span>&gt;</span>30.0<span class="tag">&lt;/<span class="name">update_rate</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">camera</span> <span class="attr">name</span>=<span class="string">"left"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">horizontal_fov</span>&gt;</span>1.3962634<span class="tag">&lt;/<span class="name">horizontal_fov</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">image</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">width</span>&gt;</span>800<span class="tag">&lt;/<span class="name">width</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">height</span>&gt;</span>800<span class="tag">&lt;/<span class="name">height</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">format</span>&gt;</span>R8G8B8<span class="tag">&lt;/<span class="name">format</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">image</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">clip</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">near</span>&gt;</span>0.02<span class="tag">&lt;/<span class="name">near</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">far</span>&gt;</span>300<span class="tag">&lt;/<span class="name">far</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">clip</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">noise</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">type</span>&gt;</span>gaussian<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mean</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">mean</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">stddev</span>&gt;</span>0.007<span class="tag">&lt;/<span class="name">stddev</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">noise</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">camera</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">camera</span> <span class="attr">name</span>=<span class="string">"right"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">pose</span>&gt;</span>0 -0.07 0 0 0 0<span class="tag">&lt;/<span class="name">pose</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">horizontal_fov</span>&gt;</span>1.3962634<span class="tag">&lt;/<span class="name">horizontal_fov</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">image</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">width</span>&gt;</span>800<span class="tag">&lt;/<span class="name">width</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">height</span>&gt;</span>800<span class="tag">&lt;/<span class="name">height</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">format</span>&gt;</span>R8G8B8<span class="tag">&lt;/<span class="name">format</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">image</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">clip</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">near</span>&gt;</span>0.02<span class="tag">&lt;/<span class="name">near</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">far</span>&gt;</span>300<span class="tag">&lt;/<span class="name">far</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">clip</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">noise</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">type</span>&gt;</span>gaussian<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mean</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">mean</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">stddev</span>&gt;</span>0.007<span class="tag">&lt;/<span class="name">stddev</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">noise</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">camera</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p>以上是两个传感器，我们可以看到是两个相同的传感器，其定义的属性从标签上就能看出来，这里重点是三个标签，clip中定义了相机能看到的最远和最近位置（现实中因为你焦点的原因，相机看物体模糊但也不至于看不到，所以搞不太懂这个标签的物理意义）。nosie是像素上的噪声，结合实际相机，很容易理解。最后重点说一下pose我们发现left相机是没有pose标签的，默认为0 0 0 0 -0 0，而right相机有个-0.07，负号说明其在右边，0.07就是指的基线的距离。这个使我们进行立体计算时需要用到的。</p>
+<p>以上是两个传感器，我们可以看到是两个相同的传感器，其定义的属性从标签上就能看出来，这里重点是三个标签，clip中定义了相机能看到的最远和最近位置（现实中因为你焦点的原因，相机看物体模糊但也不至于看不到，所以搞不太懂这个标签的物理意义）。nosie是像素上的噪声，结合实际相机，很容易理解。最后重点说一下pose我们发现left相机是没有pose标签的，默认为0 0 0 0 -0 0，而right相机有个-0.07，负号说明其在右边，0.07就是指的基线的距离。(在这里这个pose还不知道具体是什么，是相机坐标系的原点，还是图像坐标系的远点，在深度上相差一个焦距的距离。关于这两个坐标系，见<br><a href="https://blog.csdn.net/chentravelling/article/details/53558096" target="_blank" rel="noopener">https://blog.csdn.net/chentravelling/article/details/53558096</a>)
+这个是我们进行立体计算时需要用到的。这时我们发现对于一个镜头来说还需要一个很重要的参数，那就是焦距。但这里并没有给出，实际上我们可以根据水平视场horizontal_fov来计算出来的，参考以下两个介绍：<br><a href="http://playerstage.sourceforge.net/wiki/GazeboProblemResolutionGuide" target="_blank" rel="noopener">http://playerstage.sourceforge.net/wiki/GazeboProblemResolutionGuide</a><br><a href="https://answers.ros.org/question/12658/how-to-change-gazebo-gui-focal-lengthfov/" target="_blank" rel="noopener">https://answers.ros.org/question/12658/how-to-change-gazebo-gui-focal-lengthfov/</a><br>即可以通过以下公式得到焦距：<br>flength = (width/2)/tan(hfov/2）</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">      <span class="tag">&lt;<span class="name">plugin</span> <span class="attr">name</span>=<span class="string">"stereo_camera_controller"</span> <span class="attr">filename</span>=<span class="string">"libgazebo_ros_multicamera.so"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">alwaysOn</span>&gt;</span>true<span class="tag">&lt;/<span class="name">alwaysOn</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">updateRate</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">updateRate</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">cameraName</span>&gt;</span>multisense_sl/camera<span class="tag">&lt;/<span class="name">cameraName</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">imageTopicName</span>&gt;</span>image_raw<span class="tag">&lt;/<span class="name">imageTopicName</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">cameraInfoTopicName</span>&gt;</span>camera_info<span class="tag">&lt;/<span class="name">cameraInfoTopicName</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">frameName</span>&gt;</span>left_camera_optical_frame<span class="tag">&lt;/<span class="name">frameName</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--&lt;rightFrameName&gt;right_camera_optical_frame&lt;/rightFrameName&gt;--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">hackBaseline</span>&gt;</span>0.07<span class="tag">&lt;/<span class="name">hackBaseline</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">distortionK1</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">distortionK1</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">distortionK2</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">distortionK2</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">distortionK3</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">distortionK3</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">distortionT1</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">distortionT1</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">distortionT2</span>&gt;</span>0.0<span class="tag">&lt;/<span class="name">distortionT2</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">sensor</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">link</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">model</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">sdf</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>以上是传感器插件，我们发现和单目相机的插件很像，主要说下最后几个参数，如果做过单目相机矫正就很容易理解（K1 K2 T1 T2 K3）是相机的畸变系数，这里使其为0，即认为相机没有畸变，理想化了。hackBaseline这里现在也没太搞懂是啥，需要再研究一下。</p>
@@ -447,8 +575,30 @@
       
         
           
-            <p>#方法一，采用类的方法<br>参考网站<br><a href="https://blog.csdn.net/ethan_guo/article/details/80226121" target="_blank" rel="noopener">https://blog.csdn.net/ethan_guo/article/details/80226121</a></p>
-<p>#方法二，全局变量<br>作者这里只介绍了c++采用类的方法，下面介绍一下Python中用全局变量的方法实现</p>
+            <p>#方法一，采用类的方法<br>参考网站<br><a href="https://blog.csdn.net/ethan_guo/article/details/80226121" target="_blank" rel="noopener">https://blog.csdn.net/ethan_guo/article/details/80226121</a><br>当然也可以用python 实现，我们与例程中的方法为例，这里只谈如何实现在类的订阅并讨论其机制。telker代码不变：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># license removed for brevity</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">talker</span><span class="params">()</span>:</span></span><br><span class="line">    pub = rospy.Publisher(<span class="string">'hello'</span>, String, queue_size=<span class="number">1</span>)</span><br><span class="line">    rospy.init_node(<span class="string">'talker'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rate = rospy.Rate(<span class="number">10</span>) <span class="comment"># 10hz</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">        hello_str = <span class="string">"hello world %s"</span> % rospy.get_time()</span><br><span class="line">        rospy.loginfo(hello_str)</span><br><span class="line">        pub.publish(hello_str)</span><br><span class="line">        rate.sleep()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        talker()</span><br><span class="line">    <span class="keyword">except</span> rospy.ROSInterruptException:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">``` </span><br><span class="line">以下是listener 代码</span><br><span class="line">```python</span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"class comeing!"</span>)</span><br><span class="line">        rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">        rospy.Subscriber(<span class="string">"hello"</span>, String, self.callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(self,data)</span>:</span></span><br><span class="line">        rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">	print(<span class="string">"call back comeing!"</span>)</span><br><span class="line">        pub.publish(data.data)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br><span class="line">    print(<span class="string">"class circulation!!"</span>)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
+
+<p>执行这两端代码，观察输出，可以发现只有在启动时，会执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(&quot;call back comeing!&quot;)</span><br><span class="line">print(&quot;class comeing!&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>这两段代码，而回调函数中的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print(&quot;call back comeing!&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>会在每次订阅到发布的消息后执行，这里就涉及到rospy.spin()的工作机制，它并不是一直循环这个listener()类。而是循环进入类后的订阅函数，这个函数叫做ROS消息回调处理函数。可以参考官方网站查看其具体原理。</p>
+<p>到这里其实还有一个小问题，那就是关于画图，如果我们想在回调函数中实现画图，或者在回调函数中修改变量的值，而在类的构造函数中执行与此变量有关的操作，那么我们只需要在类中加一个循环即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"class comeing!"</span>)</span><br><span class="line">        self.da = []</span><br><span class="line">        rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">        rospy.Subscriber(<span class="string">"hello"</span>, String, self.callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">        <span class="comment">#############加入的循环####################</span></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">	    print(self.da)<span class="comment">#此处可以是画图的语句</span></span><br><span class="line">        <span class="comment">##########################################</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(self,data)</span>:</span></span><br><span class="line">        rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">	self.da = data.data</span><br><span class="line">	print(<span class="string">"call back comeing!"</span>)</span><br><span class="line">        pub.publish(data.data)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br><span class="line">    print(<span class="string">"class circulation!!"</span>)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
+
+<p>这时候可以发现，回调函数中得到的变量在构造函数的循环中执行了。实时画图在后面的文章中讨论。</p>
+<p>#方法二，全局变量<br>下面介绍一下Python中用全局变量的方法实现.<br>以ros wiki上面的话题通信教程为例。<br><a href="http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29" target="_blank" rel="noopener">http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29</a><br>这里定义了talker 和 listener :<br>talker:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># license removed for brevity</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">talker</span><span class="params">()</span>:</span></span><br><span class="line">    pub = rospy.Publisher(<span class="string">'pub1'</span>, String, queue_size=<span class="number">1</span>)</span><br><span class="line">    rospy.init_node(<span class="string">'talker'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rate = rospy.Rate(<span class="number">10</span>) <span class="comment"># 10hz</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">        hello_str = <span class="string">"hello world %s"</span> % rospy.get_time()</span><br><span class="line">        rospy.loginfo(hello_str)</span><br><span class="line">        pub.publish(hello_str)</span><br><span class="line">        rate.sleep()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        talker()</span><br><span class="line">    <span class="keyword">except</span> rospy.ROSInterruptException:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>这里我么修改listener,在文件中加入了一个全局变量pub，然后直接将订阅的话题通过<br>pub再次发布出去，当然，这里只是个测试，实际中肯定是对该消息进行处理后再发布的，写改后的listener如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(data)</span>:</span></span><br><span class="line">    rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">    pub.publish(data.data)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rospy.Subscriber(<span class="string">"pub1"</span>, String, callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br></pre></td></tr></table></figure>
+
+<p>这时，我们像教程中一样运行这两个程序结果并没有什么区别，但如果我们用rostopic list 查看，就会发现比原教程中多了一个话题，就是问在listener中发布的，接下来，我们创建一个listen_listener.py的文件来订阅这个话题：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(data)</span>:</span></span><br><span class="line">    rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rospy.Subscriber(<span class="string">"pub_with_sub"</span>, String, callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br></pre></td></tr></table></figure>
+
+<p>ok,别忘了将文件设置为可执行文件，这是后，我们同时打开这三个文件。会发现显示同样的内容。实际上是这样一个结构：<br>talker发布-&gt;listener订阅　再发布　－&gt; listen_listener再订阅！</p>
 
           
         
@@ -569,14 +719,14 @@
         
           
             <p>YouTube上有一个视频，是一个乒乓球机器人在gazebo里面的方针<br><a href="https://www.youtube.com/watch?v=HBNGeYZKJM4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=HBNGeYZKJM4</a><br>因为项目需要，需要实现这个发球的装置。因为第一次接触gazebo和ros所以这里把自己的研究过程记录下来。</p>
-<p>##预备知识<br>1.ros的安装和通信机制，主要是话题和服务通信。<br>    这里只需要根据根据ros wiki上的教程实现前20讲，就可以实现安装（包括gazebo_ros包）和简单入门。<br>    <a href="http://wiki.ros.org/ROS/Tutorials" target="_blank" rel="noopener">http://wiki.ros.org/ROS/Tutorials</a><br>2.gazebo的一些基础知识（非必须），这里可以看一下gazebo的入门教程<br><a href="http://gazebosim.org/tutorials" target="_blank" rel="noopener">http://gazebosim.org/tutorials</a></p>
-<p>##总体实现思路<br>整个方针的实现可以分为以下几步：</p>
+<h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>1.ros的安装和通信机制，主要是话题和服务通信。<br>    这里只需要根据根据ros wiki上的教程实现前20讲，就可以实现安装（包括gazebo_ros包）和简单入门。<br>    <a href="http://wiki.ros.org/ROS/Tutorials" target="_blank" rel="noopener">http://wiki.ros.org/ROS/Tutorials</a><br>2.gazebo的一些基础知识（非必须），这里可以看一下gazebo的入门教程<br><a href="http://gazebosim.org/tutorials" target="_blank" rel="noopener">http://gazebosim.org/tutorials</a></p>
+<h2 id="总体实现思路"><a href="#总体实现思路" class="headerlink" title="总体实现思路"></a>总体实现思路</h2><p>整个方针的实现可以分为以下几步：</p>
 <p>###环境的搭建<br>这里我们并不采用gazebo教程里面直接gui插入模型的方法，而是采用ros和gazebo的通信机制实现。如果我们按前面的方法正确安装了ros。接下来，打开终端，依次执行下列命令，每个命令可以打开一个终端<br>$roscore<br>$rosrun gazebo_ros gazebo<br>这事我们就打开了gazebo界面。接下来，我们需要一个小球.<br>$rosrun gazebo_ros spawn_model -database robocup_spl_ball -sdf -model my_ball1<br>ok,那么现在我们已经把所有需要的模型加载进来了（虽然就1个球）<br>参考网站：<a href="http://gazebosim.org/tutorials/?tut=ros_comm" target="_blank" rel="noopener">http://gazebosim.org/tutorials/?tut=ros_comm</a></p>
 <p>###动起来<br>如果仔细看了上面的教程和参考网站，那我们就会有一个整体的思路：利用gazebo提供的话题和服务就可以实现,在环境的搭建中，我们是直接采用spawn_sdf_model服务实现的模型的加载。接下来我们需要把加载的网球删除。接着实现流程如下：<br>1.使用spawn_sdf_model服务加载一个网球，并指定小球的位置<br>2.使用apply_body_wrench服务，给网球施加一个斜向上的力，使其做斜抛运动<br>3.当球弹出后，进入while循环，使用get_model_state服务得到小球的位置，当小球位置飞出预定轨迹后，跳出循环。<br>4.使用delete_model服务将这个小球删除，回到1.<br>程序如下：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> SpawnModel</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> DeleteModel</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> ApplyBodyWrench</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> GetModelState</span><br><span class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Pose</span><br><span class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Wrench</span><br><span class="line"><span class="comment">#初始位置</span></span><br><span class="line">initial_pose = Pose()</span><br><span class="line">initial_pose.position.x = <span class="number">-4</span></span><br><span class="line">initial_pose.position.y = <span class="number">-1</span></span><br><span class="line">initial_pose.position.z = <span class="number">1</span></span><br><span class="line"><span class="comment">#所用力的大小</span></span><br><span class="line">initial_wrench = Wrench()</span><br><span class="line">initial_wrench.force.x = <span class="number">0.16</span></span><br><span class="line">initial_wrench.force.y = <span class="number">0.0</span></span><br><span class="line">initial_wrench.force.z = <span class="number">0.25</span></span><br><span class="line"><span class="comment">#ctrl+h显示隐藏文档，将XXX替换为自己的目录，从自己的目录中找的这个文件</span></span><br><span class="line">f = open(<span class="string">'/home/XXXXX/.gazebo/models/robocup_spl_ball/model.sdf'</span>,<span class="string">'r'</span>)</span><br><span class="line">sdff = f.read()</span><br><span class="line"><span class="comment">#产生小球的服务</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/spawn_sdf_model'</span>)</span><br><span class="line">spawn_model_prox = rospy.ServiceProxy(<span class="string">'gazebo/spawn_sdf_model'</span>, SpawnModel)</span><br><span class="line"><span class="comment">#施加一个作用力</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/apply_body_wrench'</span>)</span><br><span class="line">apply_wrench = rospy.ServiceProxy(<span class="string">'gazebo/apply_body_wrench'</span>, ApplyBodyWrench)</span><br><span class="line"><span class="comment">#删除小球</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/delete_model'</span>)</span><br><span class="line">deletesrv = rospy.ServiceProxy(<span class="string">'gazebo/delete_model'</span>, DeleteModel)</span><br><span class="line"><span class="comment">#得到小球位置</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/get_model_state'</span>)</span><br><span class="line">get_m_state = rospy.ServiceProxy(<span class="string">'gazebo/get_model_state'</span>, GetModelState)</span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">	spawn_model_prox(<span class="string">"my_ball"</span>, sdff, <span class="string">"robotos_name_space"</span>, initial_pose, <span class="string">"world"</span>)</span><br><span class="line">	time.sleep(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">	apply_wrench(<span class="string">"my_ball::ball"</span>, <span class="string">"world"</span>, <span class="literal">None</span>, initial_wrench, rospy.Time.from_sec(<span class="number">0</span>), rospy.Duration.from_sec(<span class="number">0.2</span>))</span><br><span class="line">	s = get_m_state(<span class="string">"my_ball"</span>,<span class="string">"world"</span>)</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">		<span class="keyword">if</span>(s.pose.position.x &lt; <span class="number">6</span>):</span><br><span class="line">			s = get_m_state(<span class="string">"my_ball"</span>,<span class="string">"world"</span>)</span><br><span class="line">			print(s.pose.position.x)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			rospy.wait_for_service(<span class="string">'gazebo/delete_model'</span>)</span><br><span class="line">			deletesrv = rospy.ServiceProxy(<span class="string">'gazebo/delete_model'</span>, DeleteModel)</span><br><span class="line">			ass = deletesrv(<span class="string">"my_ball"</span>)</span><br><span class="line">			print(ass)			</span><br><span class="line">			<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
 
 <p>关于程序中各个服务的的调用方法，可以直接参考相关的消息和服务文档。</p>
-<p>最后，可以加上一个球场，改变网球的形状，使仿真环境更加逼真。这需要我们自己去创建自己的模型。</p>
+<p>最后，可以加上一个球场，改变网球的形状，使仿真环境更加逼真。这需要我们自己去创建自己的模型。<br>突然发现经常出现小球删除不掉的情况，会出现<br>DeleteModel: Model pushed to delete queue, but delete service timed out waiting for<br>  \ model to disappear from simulation”<br>调试了好久也没找出问题。有人说是gazebo的bug，真是迷了。。。</p>
 
           
         
@@ -1353,133 +1503,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/27/一些好的博客/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/07/27/一些好的博客/" itemprop="url">一些好的博客</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-07-27T16:09:45+08:00">
-                2019-07-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="闲来无事，经常在网上随便逛逛，偶尔遇到一些好的博客，在这里记录下来。已备参考，持续更新。。。。。。"><a href="#闲来无事，经常在网上随便逛逛，偶尔遇到一些好的博客，在这里记录下来。已备参考，持续更新。。。。。。" class="headerlink" title="闲来无事，经常在网上随便逛逛，偶尔遇到一些好的博客，在这里记录下来。已备参考，持续更新。。。。。。"></a>闲来无事，经常在网上随便逛逛，偶尔遇到一些好的博客，在这里记录下来。已备参考，持续更新。。。。。。</h3><h4 id="技术博客："><a href="#技术博客：" class="headerlink" title="技术博客："></a>技术博客：</h4><p><a href="http://cxd2014.github.io/archive/" target="_blank" rel="noopener">http://cxd2014.github.io/archive/</a><br>这个博客是在实习的时候偶然翻到的，关于找工作和技术博客积累的几篇有很大感悟。</p>
-<p><a href="https://36kr.com/p/5175121" target="_blank" rel="noopener">https://36kr.com/p/5175121</a><br>这篇文章讲的计算机架构的，知道了这两个大神，另外就是，对于技术要养成比较敏感的习惯。</p>
-<p><a href="https://liam.page/2014/09/08/latex-introduction/" target="_blank" rel="noopener">https://liam.page/2014/09/08/latex-introduction/</a><br><a href="https://www.jianshu.com/p/3e842d67ada2" target="_blank" rel="noopener">https://www.jianshu.com/p/3e842d67ada2</a><br>这两篇文章主要介绍了latex的安装和主要使用</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1525,7 +1553,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-count">21</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
