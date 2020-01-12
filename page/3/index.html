@@ -229,6 +229,380 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/13/（扩展）卡尔曼滤波学习参考/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/13/（扩展）卡尔曼滤波学习参考/" itemprop="url">（扩展）卡尔曼滤波学习参考</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-13T14:53:17+08:00">
+                2019-06-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="（扩展）卡尔曼滤波学习参考"><a href="#（扩展）卡尔曼滤波学习参考" class="headerlink" title="（扩展）卡尔曼滤波学习参考"></a>（扩展）卡尔曼滤波学习参考</h1><p>斜抛运动（网球，羽毛球)等轨迹与落点预测需要用到扩展卡尔曼滤波<br>这里记录一下自己学习所参考的网站<br>以及一些总结</p>
+<h2 id="直观理解"><a href="#直观理解" class="headerlink" title="直观理解"></a>直观理解</h2><p>一开始根本知道卡尔曼滤波是干什么，所以这两个介绍给了一些直观的解释</p>
+<p>1.作者截取于某教材的航海例子：<br>            <a href="https://www.cnblogs.com/rainbow70626/p/10786413.html" target="_blank" rel="noopener">https://www.cnblogs.com/rainbow70626/p/10786413.html</a></p>
+<p>2.比较容易理解的的一个一维关于温度的例子：<br>            <a href="https://blog.csdn.net/phker/article/details/48468591" target="_blank" rel="noopener">https://blog.csdn.net/phker/article/details/48468591</a></p>
+<p>3.辅助理解：<br>            <a href="http://shequ.dimianzhan.com/articles/337/extended-kalman-filter-course-from-shallow-to-deep" target="_blank" rel="noopener">http://shequ.dimianzhan.com/articles/337/extended-kalman-filter-course-from-shallow-to-deep</a></p>
+<h2 id="简单实现"><a href="#简单实现" class="headerlink" title="简单实现"></a>简单实现</h2><p>有了直观的理解，下一步就开始进一步的看一些例子以及对公式的理解。<br>对公式的理解维基百科介绍的很详细：<br> <a href="https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2</a></p>
+<p>这是一个python例子（可直接翻译网页）<a href="https://satomacoto.blogspot.com/2011/06/python_22.html：" target="_blank" rel="noopener">https://satomacoto.blogspot.com/2011/06/python_22.html：</a></p>
+<h2 id="我的理解"><a href="#我的理解" class="headerlink" title="我的理解"></a>我的理解</h2><h3 id="基于直观大白话的理解"><a href="#基于直观大白话的理解" class="headerlink" title="基于直观大白话的理解"></a>基于直观大白话的理解</h3><pre><code>我们用传感器（如直尺去测量长度，双目相机去定位）去测量一个变量（有规律运动的小车的位置）会得到一个数据，
+但由于直尺的质量或者相机的畸变等，我们的传感器会有误差。 另外，因为变量的变化是有规律的，所以我们可以
+从理论建模的角度（如高中的运动学公式）得到位置的预测，同理由于我们理论预测的时候忽略了一些变量或者噪声，
+所以得到的结果也是不准确的。卡尔曼滤波器就是基于这两个不准确的值以及两个误差。来给出最接近真实值的一个预测。</code></pre><h3 id="基于维基百科的公式"><a href="#基于维基百科的公式" class="headerlink" title="基于维基百科的公式"></a>基于维基百科的公式</h3><pre><code>在读完温度记的那个例子后，再看这两个公式</code></pre><p><img src="image/kalman03.png" alt><br><img src="image/kalman04.png" alt> </p>
+<p>我就有个疑问，X<sub>k</sub>是预测值（对应那个经验温度），Z<sub>k</sub>是观测值（对应温度计读书），这两个值怎么<br>会有关系。后来再读一遍发现不对，X<sub>k</sub>是实际值，不是预测值，预测值是不含误差项W<sub>k</sub>的，下面的第<br>一个公式才是预测值，而H<sub>k</sub>之所以被称为观测矩阵，是因为它会把非观测值去掉，如维基百科给的那个例子，乘<br>完H后，只剩下位置项，而速度是预测值所以在观测值Z<sub>k</sub>中该项为0。</p>
+<p><img src="image/kalman01.png" alt><br>另外对于几个协方差和卡尔曼增益的理解可参考维基百科给出的链接<br><a href="http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf" target="_blank" rel="noopener">http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf</a><br><img src="image/kalman02.png" alt><br>注意,这里K<sub>k</sub>实际上是个分式，如下所示<br>这里讲的和第一部分直观理解中第三个参考文献类似，可参考理解<br><img src="image/kalman05.png" alt></p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><pre><code>扩展卡尔曼滤波是针对非线性过程，但预测过程相同只不过求了个Jacobi行列式在更新时把非线性过程线性化处理，等用到再进一步整理</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/10/VS code& markdown/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/10/VS code& markdown/" itemprop="url">VS code& markdown</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-10T07:29:56+08:00">
+                2019-06-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<p>这是学习如何用<strong>VS code</strong> 编写<strong>md</strong> 文件<br>参考网站：<a href="https://sspai.com/post/53327?from=pricetag" target="_blank" rel="noopener">https://sspai.com/post/53327?from=pricetag</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/09/博客建立参考/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/09/博客建立参考/" itemprop="url">博客建立参考</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-09T18:39:37+08:00">
+                2019-06-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>此博客建立过程参考网站：</p>
+<p>参考网站：<a href="https://juejin.im/entry/5a574864f265da3e3c6c1217" target="_blank" rel="noopener">https://juejin.im/entry/5a574864f265da3e3c6c1217</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/09/hello-world/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -398,7 +772,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-count">24</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -439,7 +813,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
