@@ -79,14 +79,20 @@
 
 
 
+<meta name="description" content="FPGA 架构FPGA基础结构由一下四部分构成.Look Up Table(LUT) :执行逻辑操作.Flip-Flop(FF):存储LUT计算结果.Wires:连接线.Input/Output(I/O)pads:输入输出接口 如下所示：由这些基础的可配置逻辑单元(Configurable Logic Block,CLB)，可以实现任何算法。但是从实现效率，资源消耗和可实现的时钟频率上来说，会有一">
 <meta property="og:type" content="article">
-<meta property="og:title" content="chono challenge">
+<meta property="og:title" content="FPGA文档参考">
 <meta property="og:url" content="http://yoursite.com/2020/01/12/FPGA文档/index.html">
 <meta property="og:site_name" content="chono challenge">
+<meta property="og:description" content="FPGA 架构FPGA基础结构由一下四部分构成.Look Up Table(LUT) :执行逻辑操作.Flip-Flop(FF):存储LUT计算结果.Wires:连接线.Input/Output(I/O)pads:输入输出接口 如下所示：由这些基础的可配置逻辑单元(Configurable Logic Block,CLB)，可以实现任何算法。但是从实现效率，资源消耗和可实现的时钟频率上来说，会有一">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2020-01-12T07:32:18.125Z">
+<meta property="og:image" content="http://yoursite.com/2020/01/12/FPGA文档/Basic_FPGA_Architecture.PNG">
+<meta property="og:image" content="http://yoursite.com/2020/01/12/FPGA文档/Contemporary_FPGA_Architecture.PNG">
+<meta property="og:updated_time" content="2020-01-12T07:58:36.900Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="chono challenge">
+<meta name="twitter:title" content="FPGA文档参考">
+<meta name="twitter:description" content="FPGA 架构FPGA基础结构由一下四部分构成.Look Up Table(LUT) :执行逻辑操作.Flip-Flop(FF):存储LUT计算结果.Wires:连接线.Input/Output(I/O)pads:输入输出接口 如下所示：由这些基础的可配置逻辑单元(Configurable Logic Block,CLB)，可以实现任何算法。但是从实现效率，资源消耗和可实现的时钟频率上来说，会有一">
+<meta name="twitter:image" content="http://yoursite.com/2020/01/12/FPGA文档/Basic_FPGA_Architecture.PNG">
 
 
 
@@ -122,7 +128,7 @@
 
 
 
-  <title> | chono challenge</title>
+  <title>FPGA文档参考 | chono challenge</title>
   
 
 
@@ -246,7 +252,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline"></h1>
+          <h1 class="post-title" itemprop="name headline">FPGA文档参考</h1>
         
 
         <div class="post-meta">
@@ -296,7 +302,11 @@
       
 
       
-        
+        <h1 id="FPGA-架构"><a href="#FPGA-架构" class="headerlink" title="FPGA 架构"></a>FPGA 架构</h1><p>FPGA基础结构由一下四部分构成<br>.Look Up Table(LUT) :执行逻辑操作<br>.Flip-Flop(FF):存储LUT计算结果<br>.Wires:连接线<br>.Input/Output(I/O)pads:输入输出接口</p>
+<p>如下所示：<br><img src="/2020/01/12/FPGA文档/Basic_FPGA_Architecture.PNG" alt><br>由这些基础的可配置逻辑单元(Configurable Logic Block,CLB)，可以实现任何算法。但是从实现效率，资源消耗和可实现的时钟频率上来说，会有一些限制。<br>因此，如今先进的FPGA框架又加入了一些新的计算和存储结构，分别是：<br>• Embedded memories for distributed data storage<br>• Phase-locked loops (PLLs) for driving the FPGA fabric at different clock rates<br>• High-speed serial transceivers<br>• Off-chip memory controllers<br>• Multiply-accumulate blocks<br><img src="/2020/01/12/FPGA文档/Contemporary_FPGA_Architecture.PNG" alt></p>
+<p>下面分别讨论以上集中结构</p>
+<h3 id="LUT"><a href="#LUT" class="headerlink" title="LUT"></a>LUT</h3><p>查找表，</p>
+
       
     </div>
     
@@ -329,6 +339,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/29/算法/" rel="prev" title>
+                 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -380,8 +394,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -396,7 +419,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -423,6 +446,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#FPGA-架构"><span class="nav-number">1.</span> <span class="nav-text">FPGA 架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LUT"><span class="nav-number">1.0.1.</span> <span class="nav-text">LUT</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

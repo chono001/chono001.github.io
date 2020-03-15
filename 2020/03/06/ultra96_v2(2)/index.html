@@ -79,17 +79,20 @@
 
 
 
-<meta name="description" content="此博客建立过程参考网站： 参考网站：https://juejin.im/entry/5a574864f265da3e3c6c1217">
+<meta name="description" content="简单开发参考Ultra96 _v1的教程实现 教程1vivado 下载xilinx提供了vivado-webpack版本，该版本为免费版本，支持的产品型号虽然有限制。但是支持U96，为了省去后面各种license问题，这里下载wepack版本。 （1）注册xilinx账号，登陆下载页面https://www.xilinx.com/support/download.html （2）选择对应系统版本">
 <meta property="og:type" content="article">
-<meta property="og:title" content="博客建立参考">
-<meta property="og:url" content="http://yoursite.com/2019/06/09/博客建立参考/index.html">
+<meta property="og:title" content="Ultra96_V2(2)">
+<meta property="og:url" content="http://yoursite.com/2020/03/06/ultra96_v2(2)/index.html">
 <meta property="og:site_name" content="chono challenge">
-<meta property="og:description" content="此博客建立过程参考网站： 参考网站：https://juejin.im/entry/5a574864f265da3e3c6c1217">
+<meta property="og:description" content="简单开发参考Ultra96 _v1的教程实现 教程1vivado 下载xilinx提供了vivado-webpack版本，该版本为免费版本，支持的产品型号虽然有限制。但是支持U96，为了省去后面各种license问题，这里下载wepack版本。 （1）注册xilinx账号，登陆下载页面https://www.xilinx.com/support/download.html （2）选择对应系统版本">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-08-23T01:56:33.702Z">
+<meta property="og:image" content="http://yoursite.com/2020/03/06/ultra96_v2(2)/vivado_device_choice.PNG">
+<meta property="og:image" content="http://yoursite.com/2020/03/06/ultra96_v2(2)/image%5CU96_bdf.PNG">
+<meta property="og:updated_time" content="2020-03-06T03:54:31.763Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="博客建立参考">
-<meta name="twitter:description" content="此博客建立过程参考网站： 参考网站：https://juejin.im/entry/5a574864f265da3e3c6c1217">
+<meta name="twitter:title" content="Ultra96_V2(2)">
+<meta name="twitter:description" content="简单开发参考Ultra96 _v1的教程实现 教程1vivado 下载xilinx提供了vivado-webpack版本，该版本为免费版本，支持的产品型号虽然有限制。但是支持U96，为了省去后面各种license问题，这里下载wepack版本。 （1）注册xilinx账号，登陆下载页面https://www.xilinx.com/support/download.html （2）选择对应系统版本">
+<meta name="twitter:image" content="http://yoursite.com/2020/03/06/ultra96_v2(2)/vivado_device_choice.PNG">
 
 
 
@@ -119,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/06/09/博客建立参考/">
+  <link rel="canonical" href="http://yoursite.com/2020/03/06/ultra96_v2(2)/">
 
 
 
 
 
-  <title>博客建立参考 | chono challenge</title>
+  <title>Ultra96_V2(2) | chono challenge</title>
   
 
 
@@ -232,7 +235,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/09/博客建立参考/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/06/ultra96_v2(2)/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="John Doe">
@@ -249,7 +252,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">博客建立参考</h1>
+          <h1 class="post-title" itemprop="name headline">Ultra96_V2(2)</h1>
         
 
         <div class="post-meta">
@@ -261,8 +264,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-09T18:39:37+08:00">
-                2019-06-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-03-06T09:36:00+08:00">
+                2020-03-06
               </time>
             
 
@@ -299,8 +302,16 @@
       
 
       
-        <p>此博客建立过程参考网站：</p>
-<p>参考网站：<a href="https://juejin.im/entry/5a574864f265da3e3c6c1217" target="_blank" rel="noopener">https://juejin.im/entry/5a574864f265da3e3c6c1217</a></p>
+        <hr>
+<h1 id="简单开发"><a href="#简单开发" class="headerlink" title="简单开发"></a>简单开发</h1><p>参考Ultra96 _v1的教程实现</p>
+<h2 id="教程1"><a href="#教程1" class="headerlink" title="教程1"></a>教程1</h2><h3 id="vivado-下载"><a href="#vivado-下载" class="headerlink" title="vivado 下载"></a>vivado 下载</h3><p>xilinx提供了vivado-webpack版本，该版本为免费版本，支持的产品型号虽然有限制。但是支持U96，为了省去后面各种license问题，这里下载wepack版本。</p>
+<p>（1）注册xilinx账号，登陆下载页面<a href="https://www.xilinx.com/support/download.html" target="_blank" rel="noopener">https://www.xilinx.com/support/download.html</a></p>
+<p>（2）选择对应系统版本的统一下载器，不到100M（下载后再选择下载的Xilinx产品），这里用的是windows.选择的是<a href="https://www.xilinx.com/member/forms/download/xef.html?filename=Xilinx_Unified_2019.2_1106_2127_Win64.exe" target="_blank" rel="noopener">Xilinx Unified Installer 2019.2: Windows Self Extracting Web Installer</a> </p>
+<p>（3）下载后打开，然后登录Xilinx账户，选择vivado然后 Vivado HL WebPack版本下载。然后可以选择相应的器件型号。安装即可（U96选择如下即可，需要空间约40G，下载内容12.88G，用时较长），该下载器下载后会自动安装完成。</p>
+<p><img src="/2020/03/06/ultra96_v2(2)/vivado_device_choice.PNG" alt></p>
+<h3 id="U96开发板定义文件下载"><a href="#U96开发板定义文件下载" class="headerlink" title="U96开发板定义文件下载"></a>U96开发板定义文件下载</h3><p>（1）进入Avnet github，选择其bdf(Board Definition Files)文件库下载<a href="https://github.com/Avnet/bdf" target="_blank" rel="noopener">https://github.com/Avnet/bdf</a></p>
+<p>   (2)  解压后将其中的Ultra96v2文件夹复制到board_files文件夹</p>
+<p><img src="/2020/03/06/ultra96_v2(2)/image%5CU96_bdf.PNG" alt></p>
 
       
     </div>
@@ -325,8 +336,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/06/09/hello-world/" rel="next" title="Hello World">
-                <i class="fa fa-chevron-left"></i> Hello World
+              <a href="/2020/03/04/工科论文写作/" rel="next" title>
+                <i class="fa fa-chevron-left"></i> 
               </a>
             
           </div>
@@ -335,8 +346,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/06/10/VS code& markdown/" rel="prev" title="VS code& markdown">
-                VS code& markdown <i class="fa fa-chevron-right"></i>
+              <a href="/2020/03/06/ultra96_v2/" rel="prev" title="Ultra96_v2笔记">
+                Ultra96_v2笔记 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -389,8 +400,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -432,6 +452,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#简单开发"><span class="nav-number">1.</span> <span class="nav-text">简单开发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#教程1"><span class="nav-number">1.1.</span> <span class="nav-text">教程1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#vivado-下载"><span class="nav-number">1.1.1.</span> <span class="nav-text">vivado 下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#U96开发板定义文件下载"><span class="nav-number">1.1.2.</span> <span class="nav-text">U96开发板定义文件下载</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

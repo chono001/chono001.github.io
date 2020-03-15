@@ -229,6 +229,783 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/06/ultra96_v2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/03/06/ultra96_v2/" itemprop="url">Ultra96_v2笔记</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-03-06T09:38:34+08:00">
+                2020-03-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h1 id="开机联网"><a href="#开机联网" class="headerlink" title="开机联网"></a>开机联网</h1><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>1.Ultra96_v2电源（与PYNQ -Z2不同，U96的板子必须得用电源供电，而且买的开发板是不带电源的。其电源接口为4.8mm而不是5.5m这里我们买了一个12v 2A d的电源和一个5.5x2.1母转4.8x1.7的转接线）</p>
+<p>2.MicroSD卡，官网下载镜像文件并用Win32Diskmager写入。（板子包装带有读卡器和SD卡）</p>
+<p>3.usb线</p>
+<h1 id="进入系统"><a href="#进入系统" class="headerlink" title="进入系统"></a>进入系统</h1><p>按照官方教程进入之后开机之后，可以直接访问192.168.3.1进入jupyter notebook.</p>
+<p>1.通过jupyter notebook下common/wifi.ipynb文件可进行联网</p>
+<p>2.通过jupyter notebook 右上角新建terminal 可直接进入操作系统terminal</p>
+<p>   这里也可以通过串口访问terminal，官方给出putty教程，这里介绍使用x-shell访问</p>
+<p>​    （1）在插入USB的情况下，访问计算机设备管理器查看端口号</p>
+<p><img src="/2020/03/06/ultra96_v2/Ultra96_COM.PNG" alt> </p>
+<p>​    （2）打开x-shell新建连接，给新的连接任意命名，并选择SERIAL协议（默认为SSH）</p>
+<p><img src="/2020/03/06/ultra96_v2/Ultra96_xshell_1.png" alt></p>
+<p>​    （3）在SERIAL下，修改端口号为（1）中端口号，波特率为115200,最后点击连接，即可进入。</p>
+<p><img src="/2020/03/06/ultra96_v2/Ultra96_xshell_2.png" alt></p>
+<p>进入之后，会看到提示为Ubuntu18</p>
+<p><img src="/2020/03/06/ultra96_v2/Ubuntu18.PNG" alt></p>
+<h3 id="第二种访问方式"><a href="#第二种访问方式" class="headerlink" title="第二种访问方式"></a>第二种访问方式</h3><p>上面提到可直接通过USB 登入192.168.3.1访问jupyter并联网。这里也可以通过串口访问系统后。利用linux命令联网（自行百度），用ifconfig命令查询U96的IP。然后通过该IP访问Jupyter(要求计算机和U96在同一局域网)</p>
+<h1 id="访问系统文件"><a href="#访问系统文件" class="headerlink" title="访问系统文件"></a>访问系统文件</h1><p>开发板开启后，会开启Samba文件共享服务。这时只需在windows资源管理器中访问以下链接即可（注意在是在USB线连接的情况下）,打开后即可和计算机交换文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\\192.168.3.1\xilinx</span><br></pre></td></tr></table></figure>
+
+<p>我的系统是win10，发现不能直接访问，访问提示不存在。因此，应该是计算机的文件共享服务未启用。这时按照这个网站操作即可<a href="https://jingyan.baidu.com/article/2a138328d7b94c074a134f27.html" target="_blank" rel="noopener">https://jingyan.baidu.com/article/2a138328d7b94c074a134f27.html</a><br>这里将简述操作步骤<br>（1）win+R 打开运行搜索框<br>（2）输入 gpedit.msc 后，确定<br>（3）在本地组策略编辑器对话框中，依次单击“计算机配置”“管理模板”“网络”。<br>（4）单击“lanman工作站”。<br>（5）双击“启用不安全的来宾登录”，单击“已启用”，单击“确定”即可。<br>这时发现就可以访问了</p>
+<h1 id="安装ROS"><a href="#安装ROS" class="headerlink" title="安装ROS"></a>安装ROS</h1><p>因为U96采用的是Ubuntu18，因此这里注意ROS kinetic版本是不支持直接安装的。所以这里选择支持Ubuntu18的ROS Melodic版本。刚开始直接使用官方给出的源，一直显示IP not found的问题，于是按照这个网站的源进行操作</p>
+<p><a href="https://www.antongvozdev.com/portfolio/ros-installation/" target="_blank" rel="noopener">https://www.antongvozdev.com/portfolio/ros-installation/</a></p>
+<p>首先terminal（用jupyter 或者x-shell打开都可）输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export ROS_OS_OVERRIDE=ubuntu:bionic</span><br></pre></td></tr></table></figure>
+
+<p>接着输入，和官方给出的源相比用 bionic 替换了$(lsb_release -sc)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c &apos;echo &quot;deb http://packages.ros.org/ros/ubuntu bionic main&quot; &gt; /etc/apt/sources.list.d/ros-latest.list&apos;</span><br></pre></td></tr></table></figure>
+
+<p>然后按照官方教程添加密钥，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-key adv --keyserver &apos;hkp://keyserver.ubuntu.com:80&apos; --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654</span><br></pre></td></tr></table></figure>
+
+<p>更新源</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<p>安装(注意这里是ROS Melodic)，比较耗时，我用了一个多小时</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install ros-melodic-desktop-full</span><br></pre></td></tr></table></figure>
+
+<p>初始化rosdep（此步骤可能会遇到问题参考<a href="https://www.jianshu.com/p/bdbfbac69114" target="_blank" rel="noopener">https://www.jianshu.com/p/bdbfbac69114</a>  ）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo rosdep init</span><br><span class="line">rosdep update</span><br></pre></td></tr></table></figure>
+
+<p>设置环境变量(加入bashrc文件，使得所有的terminal都生效)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;source /opt/ros/melodic/setup.bash&quot; &gt;&gt; ~/.bashrc</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+<p>安装rosinsatall</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install python-rosinstall python-rosinstall-generator python-wstool build-essential</span><br></pre></td></tr></table></figure>
+
+<p>安装完成</p>
+<p>注：我在初始化rosdep步骤，产生的问题为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo rosdep init</span><br><span class="line">ERROR: cannot download default sources list from:</span><br><span class="line">https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/sources.list.d/20-default.list</span><br><span class="line">Website may be down.</span><br></pre></td></tr></table></figure>
+
+<p>解决方法为打开该网站，其为文本内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># os-specific listings first</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/osx-homebrew.yaml osx</span><br><span class="line"></span><br><span class="line"># generic</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/python.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/ruby.yaml</span><br><span class="line">gbpdistro https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml fuerte</span><br><span class="line"></span><br><span class="line"># newer distributions (Groovy, Hydro, ...) must not be listed anymore, they are being fetched from the rosdistro index.yaml instead</span><br></pre></td></tr></table></figure>
+
+<p>将该文本复制到   /etc/ros/rosdep/sources.list.d/20-default.list文本文件中，若rosdep update报错，执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install python-rosdep</span><br></pre></td></tr></table></figure>
+
+<p>还不清楚为什么只安装python-rosdep，后续会测试一下能不能编译c++包</p>
+<h1 id="ROS使用常见问题"><a href="#ROS使用常见问题" class="headerlink" title="ROS使用常见问题"></a>ROS使用常见问题</h1><p>安装后，按照ros wiki的教程创建工作空间和功能报即可。过程中遇到的一些问题在这里总结</p>
+<h3 id="1-创建功能包后，如何把win10中编辑的源文件（-py-cpp）拷入功能包中"><a href="#1-创建功能包后，如何把win10中编辑的源文件（-py-cpp）拷入功能包中" class="headerlink" title="1.创建功能包后，如何把win10中编辑的源文件（.py/.cpp）拷入功能包中?"></a>1.创建功能包后，如何把win10中编辑的源文件（.py/.cpp）拷入功能包中?</h3><p>答：可通过直接访问windows 资源管理器按照上面提出的方法，访问</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\\192.168.3.1\xilinx</span><br></pre></td></tr></table></figure>
+
+<p>即可，但是会发现文件夹为只读，不能直接拷入，使用以下命令修改文件夹权限</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod -R 777 catkin_ws #改变该工作空间的权限</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-运行功能包时出现：-usr-bin-env-‘python-r’-No-such-file-or-directory问题？"><a href="#2-运行功能包时出现：-usr-bin-env-‘python-r’-No-such-file-or-directory问题？" class="headerlink" title="2.运行功能包时出现：/usr/bin/env: ‘python\r’: No such file or directory问题？"></a>2.运行功能包时出现：/usr/bin/env: ‘python\r’: No such file or directory问题？</h3><p>这是由于window和linux的编码方式引起的，这里采用一个dos2unix包的小工具修改文件编码即可。</p>
+<p>参考： <a href="https://blog.csdn.net/NiYintang/article/details/86124338" target="_blank" rel="noopener">https://blog.csdn.net/NiYintang/article/details/86124338</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install dos2unix</span><br><span class="line">dos2unix &lt;filename</span><br></pre></td></tr></table></figure>
+
+<h1 id="桌面环境安装"><a href="#桌面环境安装" class="headerlink" title="桌面环境安装"></a>桌面环境安装</h1><p>在jupyter的terminal中打开时，发现有vncserver时提示如下错误</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vncserver: The HOME environment variable is not set.</span><br></pre></td></tr></table></figure>
+
+<p>于是用x-shell连接，发现能够使用了</p>
+<p><a href="http://www.scutmath.com/ubuntu_vnc.html" target="_blank" rel="noopener">http://www.scutmath.com/ubuntu_vnc.html</a></p>
+<p>按照这个教程，安装到最后，桌面访问一直是灰色的，搞不清什么原因</p>
+<p><img src="/2020/03/06/ultra96_v2/grey_screen.png" alt></p>
+<p>试了gnome 和xfce，改了好多次xstartup文件（可通过win10资源管理器直接打开.vnc文件夹修改），一直未能成功，后面有时间再接着研究</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/06/ultra96_v2(2)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/03/06/ultra96_v2(2)/" itemprop="url">Ultra96_V2(2)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-03-06T09:36:00+08:00">
+                2020-03-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h1 id="简单开发"><a href="#简单开发" class="headerlink" title="简单开发"></a>简单开发</h1><p>参考Ultra96 _v1的教程实现</p>
+<h2 id="教程1"><a href="#教程1" class="headerlink" title="教程1"></a>教程1</h2><h3 id="vivado-下载"><a href="#vivado-下载" class="headerlink" title="vivado 下载"></a>vivado 下载</h3><p>xilinx提供了vivado-webpack版本，该版本为免费版本，支持的产品型号虽然有限制。但是支持U96，为了省去后面各种license问题，这里下载wepack版本。</p>
+<p>（1）注册xilinx账号，登陆下载页面<a href="https://www.xilinx.com/support/download.html" target="_blank" rel="noopener">https://www.xilinx.com/support/download.html</a></p>
+<p>（2）选择对应系统版本的统一下载器，不到100M（下载后再选择下载的Xilinx产品），这里用的是windows.选择的是<a href="https://www.xilinx.com/member/forms/download/xef.html?filename=Xilinx_Unified_2019.2_1106_2127_Win64.exe" target="_blank" rel="noopener">Xilinx Unified Installer 2019.2: Windows Self Extracting Web Installer</a> </p>
+<p>（3）下载后打开，然后登录Xilinx账户，选择vivado然后 Vivado HL WebPack版本下载。然后可以选择相应的器件型号。安装即可（U96选择如下即可，需要空间约40G，下载内容12.88G，用时较长），该下载器下载后会自动安装完成。</p>
+<p><img src="/2020/03/06/ultra96_v2(2)/vivado_device_choice.PNG" alt></p>
+<h3 id="U96开发板定义文件下载"><a href="#U96开发板定义文件下载" class="headerlink" title="U96开发板定义文件下载"></a>U96开发板定义文件下载</h3><p>（1）进入Avnet github，选择其bdf(Board Definition Files)文件库下载<a href="https://github.com/Avnet/bdf" target="_blank" rel="noopener">https://github.com/Avnet/bdf</a></p>
+<p>   (2)  解压后将其中的Ultra96v2文件夹复制到board_files文件夹</p>
+<p><img src="/2020/03/06/ultra96_v2(2)/image%5CU96_bdf.PNG" alt></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/04/工科论文写作/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/03/04/工科论文写作/" itemprop="url">Untitled</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-03-04T09:11:25+08:00">
+                2020-03-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="前言提纲"><a href="#前言提纲" class="headerlink" title="前言提纲"></a>前言提纲</h4><p>交代研究背景</p>
+<p>说明研究内容重要性</p>
+<p>指出目前研究的不足（重要）</p>
+<p>提出研究的问题</p>
+<p>简要说明解决方法</p>
+<p>说明为什么用上述方法（重要，需要明确表现出来）</p>
+<p>给出文章结构</p>
+<h4 id="前言内容"><a href="#前言内容" class="headerlink" title="前言内容"></a>前言内容</h4><p>（1）介绍领域大背景，逐渐聚焦到研究内容</p>
+<p>让本领域研究人员了解论文工作中的点，并显示出这个点在这个领域的重要性</p>
+<p>（2）介绍研究内容的研究进展和前沿</p>
+<p>（3）说明论文研究的问题</p>
+<p>（4）</p>
+<p>  (5)说明文章的创新的与贡献（重要）</p>
+<p>（6）简要说明文章结构</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/03/ultra96_v2(1)/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/03/03/ultra96_v2(1)/" itemprop="url">Untitled</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-03-03T19:14:46+08:00">
+                2020-03-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>title:Ultra96_v2笔记</p>
+<h1 id="开机联网"><a href="#开机联网" class="headerlink" title="开机联网"></a>开机联网</h1><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>1.Ultra96_v2电源（与PYNQ -Z2不同，U96的板子必须得用电源供电，而且买的开发板是不带电源的。其电源接口为4.8mm而不是5.5m这里我们买了一个12v 2A d的电源和一个5.5x2.1母转4.8x1.7的转接线）</p>
+<p>2.MicroSD卡，官网下载镜像文件并用Win32Diskmager写入。（板子包装带有读卡器和SD卡）</p>
+<p>3.usb线</p>
+<h1 id="进入系统"><a href="#进入系统" class="headerlink" title="进入系统"></a>进入系统</h1><p>按照官方教程进入之后开机之后，可以直接访问192.168.3.1进入jupyter notebook.</p>
+<p>1.通过jupyter notebook下common/wifi.ipynb文件可进行联网</p>
+<p>2.通过jupyter notebook 右上角新建terminal 可直接进入操作系统terminal</p>
+<p>   这里也可以通过串口访问terminal，官方给出putty教程，这里介绍使用x-shell访问</p>
+<p>​    （1）在插入USB的情况下，访问计算机设备管理器查看端口号</p>
+<p><img src="/2020/03/03/ultra96_v2(1)/Ultra96_COM.PNG" alt> </p>
+<p>​    （2）打开x-shell新建连接，给新的连接任意命名，并选择SERIAL协议（默认为SSH）</p>
+<p><img src="/2020/03/03/ultra96_v2(1)/Ultra96_xshell_1.png" alt></p>
+<p>​    （3）在SERIAL下，修改端口号为（1）中端口号，波特率为115200,最后点击连接，即可进入。</p>
+<p><img src="/2020/03/03/ultra96_v2(1)/Ultra96_xshell_2.png" alt></p>
+<p>进入之后，会看到提示为Ubuntu18</p>
+<p><img src="/2020/03/03/ultra96_v2(1)/Ubuntu18.PNG" alt></p>
+<h3 id="第二种访问方式"><a href="#第二种访问方式" class="headerlink" title="第二种访问方式"></a>第二种访问方式</h3><p>上面提到可直接通过USB 登入192.168.3.1访问jupyter并联网。这里也可以通过串口访问系统后。利用linux命令联网（百度），用ifconfig命令查询U96的IP。然后通过该IP访问Jupyter(要求计算机和U96在同一局域网)</p>
+<h1 id="访问系统文件"><a href="#访问系统文件" class="headerlink" title="访问系统文件"></a>访问系统文件</h1><p>开发板开启后，会开启Samba文件共享服务。这时只需在windows资源管理器中访问以下链接即可（注意在是在USB线连接的情况下）,打开后即可和计算机交换文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\\192.168.3.1\xilinx</span><br></pre></td></tr></table></figure>
+
+<p>我的系统是win10，发现不能直接访问，访问提示不存在。因此，应该是计算机的文件共享服务未启用。这时按照这个网站操作即可<a href="https://jingyan.baidu.com/article/2a138328d7b94c074a134f27.html" target="_blank" rel="noopener">https://jingyan.baidu.com/article/2a138328d7b94c074a134f27.html</a><br>这里将简述操作步骤<br>（1）win+R 打开运行搜索框<br>（2）输入 gpedit.msc 后，确定<br>（3）在本地组策略编辑器对话框中，依次单击“计算机配置”“管理模板”“网络”。<br>（4）单击“lanman工作站”。<br>（5）双击“启用不安全的来宾登录”，单击“已启用”，单击“确定”即可。<br>这时发现就可以访问了</p>
+<h1 id="安装ROS"><a href="#安装ROS" class="headerlink" title="安装ROS"></a>安装ROS</h1><p>因为U96采用的是Ubuntu18，因此这里注意ROS kinetic版本是不支持直接安装的。所以这里选择支持Ubuntu18的ROS Melodic版本。刚开始直接使用官方给出的源，一直显示IP not found的问题，于是按照这个网站的源进行操作</p>
+<p><a href="https://www.antongvozdev.com/portfolio/ros-installation/" target="_blank" rel="noopener">https://www.antongvozdev.com/portfolio/ros-installation/</a></p>
+<p>首先terminal（用jupyter 或者x-shell打开都可）输入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export ROS_OS_OVERRIDE=ubuntu:bionic</span><br></pre></td></tr></table></figure>
+
+<p>接着输入，和官方给出的源相比用 bionic 替换了$(lsb_release -sc)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c &apos;echo &quot;deb http://packages.ros.org/ros/ubuntu bionic main&quot; &gt; /etc/apt/sources.list.d/ros-latest.list&apos;</span><br></pre></td></tr></table></figure>
+
+<p>然后按照官方教程添加密钥，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-key adv --keyserver &apos;hkp://keyserver.ubuntu.com:80&apos; --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654</span><br></pre></td></tr></table></figure>
+
+<p>更新源</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<p>安装(注意这里是ROS Melodic)，比较耗时，我用了一个多小时</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install ros-melodic-desktop-full</span><br></pre></td></tr></table></figure>
+
+<p>初始化rosdep（此步骤可能会遇到问题参考<a href="https://www.jianshu.com/p/bdbfbac69114" target="_blank" rel="noopener">https://www.jianshu.com/p/bdbfbac69114</a>  ）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo rosdep init</span><br><span class="line">rosdep update</span><br></pre></td></tr></table></figure>
+
+<p>设置环境变量(加入bashrc文件，使得所有的terminal都生效)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;source /opt/ros/melodic/setup.bash&quot; &gt;&gt; ~/.bashrc</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+<p>安装rosinsatall</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install python-rosinstall python-rosinstall-generator python-wstool build-essential</span><br></pre></td></tr></table></figure>
+
+<p>安装完成</p>
+<p>注：我在初始化rosdep步骤，产生的问题为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo rosdep init</span><br><span class="line">ERROR: cannot download default sources list from:</span><br><span class="line">https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/sources.list.d/20-default.list</span><br><span class="line">Website may be down.</span><br></pre></td></tr></table></figure>
+
+<p>解决方法为打开该网站，其为文本内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># os-specific listings first</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/osx-homebrew.yaml osx</span><br><span class="line"></span><br><span class="line"># generic</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/python.yaml</span><br><span class="line">yaml https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/ruby.yaml</span><br><span class="line">gbpdistro https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml fuerte</span><br><span class="line"></span><br><span class="line"># newer distributions (Groovy, Hydro, ...) must not be listed anymore, they are being fetched from the rosdistro index.yaml instead</span><br></pre></td></tr></table></figure>
+
+<p>将该文本复制到   /etc/ros/rosdep/sources.list.d/20-default.list文本文件中，若rosdep update报错，执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install python-rosdep</span><br></pre></td></tr></table></figure>
+
+<p>还不清楚为什么只安装python-rosdep，后续会测试一下能不能编译c++包</p>
+<h1 id="ROS使用常见问题"><a href="#ROS使用常见问题" class="headerlink" title="ROS使用常见问题"></a>ROS使用常见问题</h1><p>安装后，按照ros wiki的教程创建工作空间和功能报即可。过程中遇到的一些问题在这里总结</p>
+<h3 id="1-创建功能包后，如何把win10中编辑的源文件（-py-cpp）拷入功能包中"><a href="#1-创建功能包后，如何把win10中编辑的源文件（-py-cpp）拷入功能包中" class="headerlink" title="1.创建功能包后，如何把win10中编辑的源文件（.py/.cpp）拷入功能包中?"></a>1.创建功能包后，如何把win10中编辑的源文件（.py/.cpp）拷入功能包中?</h3><p>答：可通过直接访问windows 资源管理器按照上面提出的方法，访问</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\\192.168.3.1\xilinx</span><br></pre></td></tr></table></figure>
+
+<p>即可，但是会发现文件夹为只读，不能直接拷入，使用以下命令修改文件夹权限</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chmod -R 777 catkin_ws #改变该工作空间的权限</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-运行功能包时出现：-usr-bin-env-‘python-r’-No-such-file-or-directory问题？"><a href="#2-运行功能包时出现：-usr-bin-env-‘python-r’-No-such-file-or-directory问题？" class="headerlink" title="2.运行功能包时出现：/usr/bin/env: ‘python\r’: No such file or directory问题？"></a>2.运行功能包时出现：/usr/bin/env: ‘python\r’: No such file or directory问题？</h3><p>这是由于window和linux的编码方式引起的，这里采用一个dos2unix包的小工具修改文件编码即可。</p>
+<p>参考： <a href="https://blog.csdn.net/NiYintang/article/details/86124338" target="_blank" rel="noopener">https://blog.csdn.net/NiYintang/article/details/86124338</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install dos2unix</span><br><span class="line">dos2unix &lt;filename</span><br></pre></td></tr></table></figure>
+
+<h1 id="桌面环境安装"><a href="#桌面环境安装" class="headerlink" title="桌面环境安装"></a>桌面环境安装</h1><p>在jupyter的terminal中打开时，发现有vncserver时提示如下错误</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vncserver: The HOME environment variable is not set.</span><br></pre></td></tr></table></figure>
+
+<p>于是用x-shell连接，发现能够使用了</p>
+<p><a href="http://www.scutmath.com/ubuntu_vnc.html" target="_blank" rel="noopener">http://www.scutmath.com/ubuntu_vnc.html</a></p>
+<p>按照这个教程，安装到最后，桌面访问一直是灰色的，搞不清什么原因</p>
+<p><img src="/2020/03/03/ultra96_v2(1)/grey_screen.png" alt></p>
+<p>试了gnome 和xfce，改了好多次xstartup文件（可通过win10资源管理器直接打开.vnc文件夹修改），一直未能成功，后面有时间再接着研究</p>
+<h1 id="Computer-Vision-in-U96"><a href="#Computer-Vision-in-U96" class="headerlink" title="Computer Vision in U96"></a>Computer Vision in U96</h1><p>cv2.imshow函数不能直接用于jupyter</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/29/算法/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/01/29/算法/" itemprop="url">Untitled</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2020-01-29T10:25:55+08:00">
+                2020-01-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<p>Title: 算法</p>
+<h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>在写程序时，经常会遇到两个问题，一个是在同一个平台上不同的算法有不同的执行效率，另一个是对于同一个算法，在不同平台上的执行效率。第一个问题涉及到的是数据结构与算法相关的问题，而第二个问题涉及到的是硬件层面的关于处理器架构的问题。当然，两个问题并不是孤立的，对于某一特定的架构，可能会有最适合其的算法，操作系统和编译器。这是一个很庞大的问题。需要找到一个出发点。这里先从算法这个点去入手。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/01/12/FPGA文档/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -248,7 +1025,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2020/01/12/FPGA文档/" itemprop="url">Untitled</a></h1>
+                <a class="post-title-link" href="/2020/01/12/FPGA文档/" itemprop="url">FPGA文档参考</a></h1>
         
 
         <div class="post-meta">
@@ -300,7 +1077,11 @@
       
         
           
-            
+            <h1 id="FPGA-架构"><a href="#FPGA-架构" class="headerlink" title="FPGA 架构"></a>FPGA 架构</h1><p>FPGA基础结构由一下四部分构成<br>.Look Up Table(LUT) :执行逻辑操作<br>.Flip-Flop(FF):存储LUT计算结果<br>.Wires:连接线<br>.Input/Output(I/O)pads:输入输出接口</p>
+<p>如下所示：<br><img src="/2020/01/12/FPGA文档/Basic_FPGA_Architecture.PNG" alt><br>由这些基础的可配置逻辑单元(Configurable Logic Block,CLB)，可以实现任何算法。但是从实现效率，资源消耗和可实现的时钟频率上来说，会有一些限制。<br>因此，如今先进的FPGA框架又加入了一些新的计算和存储结构，分别是：<br>• Embedded memories for distributed data storage<br>• Phase-locked loops (PLLs) for driving the FPGA fabric at different clock rates<br>• High-speed serial transceivers<br>• Off-chip memory controllers<br>• Multiply-accumulate blocks<br><img src="/2020/01/12/FPGA文档/Contemporary_FPGA_Architecture.PNG" alt></p>
+<p>下面分别讨论以上集中结构</p>
+<h3 id="LUT"><a href="#LUT" class="headerlink" title="LUT"></a>LUT</h3><p>查找表，</p>
+
           
         
       
@@ -854,642 +1635,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/10/ros在同一节点同时订阅和发布消息/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/10/ros在同一节点同时订阅和发布消息/" itemprop="url">ros在同一节点同时订阅和发布消息</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-10T17:21:49+08:00">
-                2019-12-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>#方法一，采用类的方法<br>参考网站<br><a href="https://blog.csdn.net/ethan_guo/article/details/80226121" target="_blank" rel="noopener">https://blog.csdn.net/ethan_guo/article/details/80226121</a><br>当然也可以用python 实现，我们与例程中的方法为例，这里只谈如何实现在类的订阅并讨论其机制。telker代码不变：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># license removed for brevity</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">talker</span><span class="params">()</span>:</span></span><br><span class="line">    pub = rospy.Publisher(<span class="string">'hello'</span>, String, queue_size=<span class="number">1</span>)</span><br><span class="line">    rospy.init_node(<span class="string">'talker'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rate = rospy.Rate(<span class="number">10</span>) <span class="comment"># 10hz</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">        hello_str = <span class="string">"hello world %s"</span> % rospy.get_time()</span><br><span class="line">        rospy.loginfo(hello_str)</span><br><span class="line">        pub.publish(hello_str)</span><br><span class="line">        rate.sleep()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        talker()</span><br><span class="line">    <span class="keyword">except</span> rospy.ROSInterruptException:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">``` </span><br><span class="line">以下是listener 代码</span><br><span class="line">```python</span><br><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"class comeing!"</span>)</span><br><span class="line">        rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">        rospy.Subscriber(<span class="string">"hello"</span>, String, self.callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(self,data)</span>:</span></span><br><span class="line">        rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">	print(<span class="string">"call back comeing!"</span>)</span><br><span class="line">        pub.publish(data.data)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br><span class="line">    print(<span class="string">"class circulation!!"</span>)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
-
-<p>执行这两端代码，观察输出，可以发现只有在启动时，会执行</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(&quot;call back comeing!&quot;)</span><br><span class="line">print(&quot;class comeing!&quot;)</span><br></pre></td></tr></table></figure>
-
-<p>这两段代码，而回调函数中的</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print(&quot;call back comeing!&quot;)</span><br></pre></td></tr></table></figure>
-
-<p>会在每次订阅到发布的消息后执行，这里就涉及到rospy.spin()的工作机制，它并不是一直循环这个listener()类。而是循环进入类后的订阅函数，这个函数叫做ROS消息回调处理函数。可以参考官方网站查看其具体原理。</p>
-<p>到这里其实还有一个小问题，那就是关于画图，如果我们想在回调函数中实现画图，或者在回调函数中修改变量的值，而在类的构造函数中执行与此变量有关的操作，那么我们只需要在类中加一个循环即可：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"class comeing!"</span>)</span><br><span class="line">        self.da = []</span><br><span class="line">        rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">        rospy.Subscriber(<span class="string">"hello"</span>, String, self.callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">        <span class="comment">#############加入的循环####################</span></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">	    print(self.da)<span class="comment">#此处可以是画图的语句</span></span><br><span class="line">        <span class="comment">##########################################</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(self,data)</span>:</span></span><br><span class="line">        rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">	self.da = data.data</span><br><span class="line">	print(<span class="string">"call back comeing!"</span>)</span><br><span class="line">        pub.publish(data.data)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br><span class="line">    print(<span class="string">"class circulation!!"</span>)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
-
-<p>这时候可以发现，回调函数中得到的变量在构造函数的循环中执行了。实时画图在后面的文章中讨论。</p>
-<p>#方法二，全局变量<br>下面介绍一下Python中用全局变量的方法实现.<br>以ros wiki上面的话题通信教程为例。<br><a href="http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29" target="_blank" rel="noopener">http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29</a><br>这里定义了talker 和 listener :<br>talker:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># license removed for brevity</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">talker</span><span class="params">()</span>:</span></span><br><span class="line">    pub = rospy.Publisher(<span class="string">'pub1'</span>, String, queue_size=<span class="number">1</span>)</span><br><span class="line">    rospy.init_node(<span class="string">'talker'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rate = rospy.Rate(<span class="number">10</span>) <span class="comment"># 10hz</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">        hello_str = <span class="string">"hello world %s"</span> % rospy.get_time()</span><br><span class="line">        rospy.loginfo(hello_str)</span><br><span class="line">        pub.publish(hello_str)</span><br><span class="line">        rate.sleep()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        talker()</span><br><span class="line">    <span class="keyword">except</span> rospy.ROSInterruptException:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
-
-<p>这里我么修改listener,在文件中加入了一个全局变量pub，然后直接将订阅的话题通过<br>pub再次发布出去，当然，这里只是个测试，实际中肯定是对该消息进行处理后再发布的，写改后的listener如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(data)</span>:</span></span><br><span class="line">    rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">    pub.publish(data.data)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rospy.Subscriber(<span class="string">"pub1"</span>, String, callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br></pre></td></tr></table></figure>
-
-<p>这时，我们像教程中一样运行这两个程序结果并没有什么区别，但如果我们用rostopic list 查看，就会发现比原教程中多了一个话题，就是问在listener中发布的，接下来，我们创建一个listen_listener.py的文件来订阅这个话题：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(data)</span>:</span></span><br><span class="line">    rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rospy.Subscriber(<span class="string">"pub_with_sub"</span>, String, callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br></pre></td></tr></table></figure>
-
-<p>ok,别忘了将文件设置为可执行文件，这是后，我们同时打开这三个文件。会发现显示同样的内容。实际上是这样一个结构：<br>talker发布-&gt;listener订阅　再发布　－&gt; listen_listener再订阅！</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/07/gazebo发球实现/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/07/gazebo发球实现/" itemprop="url">gazebo和ros通信实现发球</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-07T11:56:42+08:00">
-                2019-12-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>YouTube上有一个视频，是一个乒乓球机器人在gazebo里面的方针<br><a href="https://www.youtube.com/watch?v=HBNGeYZKJM4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=HBNGeYZKJM4</a><br>因为项目需要，需要实现这个发球的装置。因为第一次接触gazebo和ros所以这里把自己的研究过程记录下来。</p>
-<h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>1.ros的安装和通信机制，主要是话题和服务通信。<br>    这里只需要根据根据ros wiki上的教程实现前20讲，就可以实现安装（包括gazebo_ros包）和简单入门。<br>    <a href="http://wiki.ros.org/ROS/Tutorials" target="_blank" rel="noopener">http://wiki.ros.org/ROS/Tutorials</a><br>2.gazebo的一些基础知识（非必须），这里可以看一下gazebo的入门教程<br><a href="http://gazebosim.org/tutorials" target="_blank" rel="noopener">http://gazebosim.org/tutorials</a></p>
-<h2 id="总体实现思路"><a href="#总体实现思路" class="headerlink" title="总体实现思路"></a>总体实现思路</h2><p>整个方针的实现可以分为以下几步：</p>
-<p>###环境的搭建<br>这里我们并不采用gazebo教程里面直接gui插入模型的方法，而是采用ros和gazebo的通信机制实现。如果我们按前面的方法正确安装了ros。接下来，打开终端，依次执行下列命令，每个命令可以打开一个终端<br>$roscore<br>$rosrun gazebo_ros gazebo<br>这事我们就打开了gazebo界面。接下来，我们需要一个小球.<br>$rosrun gazebo_ros spawn_model -database robocup_spl_ball -sdf -model my_ball1<br>ok,那么现在我们已经把所有需要的模型加载进来了（虽然就1个球）<br>参考网站：<a href="http://gazebosim.org/tutorials/?tut=ros_comm" target="_blank" rel="noopener">http://gazebosim.org/tutorials/?tut=ros_comm</a></p>
-<p>###动起来<br>如果仔细看了上面的教程和参考网站，那我们就会有一个整体的思路：利用gazebo提供的话题和服务就可以实现,在环境的搭建中，我们是直接采用spawn_sdf_model服务实现的模型的加载。接下来我们需要把加载的网球删除。接着实现流程如下：<br>1.使用spawn_sdf_model服务加载一个网球，并指定小球的位置<br>2.使用apply_body_wrench服务，给网球施加一个斜向上的力，使其做斜抛运动<br>3.当球弹出后，进入while循环，使用get_model_state服务得到小球的位置，当小球位置飞出预定轨迹后，跳出循环。<br>4.使用delete_model服务将这个小球删除，回到1.<br>程序如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> SpawnModel</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> DeleteModel</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> ApplyBodyWrench</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> GetModelState</span><br><span class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Pose</span><br><span class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Wrench</span><br><span class="line"><span class="comment">#初始位置</span></span><br><span class="line">initial_pose = Pose()</span><br><span class="line">initial_pose.position.x = <span class="number">-4</span></span><br><span class="line">initial_pose.position.y = <span class="number">-1</span></span><br><span class="line">initial_pose.position.z = <span class="number">1</span></span><br><span class="line"><span class="comment">#所用力的大小</span></span><br><span class="line">initial_wrench = Wrench()</span><br><span class="line">initial_wrench.force.x = <span class="number">0.16</span></span><br><span class="line">initial_wrench.force.y = <span class="number">0.0</span></span><br><span class="line">initial_wrench.force.z = <span class="number">0.25</span></span><br><span class="line"><span class="comment">#ctrl+h显示隐藏文档，将XXX替换为自己的目录，从自己的目录中找的这个文件</span></span><br><span class="line">f = open(<span class="string">'/home/XXXXX/.gazebo/models/robocup_spl_ball/model.sdf'</span>,<span class="string">'r'</span>)</span><br><span class="line">sdff = f.read()</span><br><span class="line"><span class="comment">#产生小球的服务</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/spawn_sdf_model'</span>)</span><br><span class="line">spawn_model_prox = rospy.ServiceProxy(<span class="string">'gazebo/spawn_sdf_model'</span>, SpawnModel)</span><br><span class="line"><span class="comment">#施加一个作用力</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/apply_body_wrench'</span>)</span><br><span class="line">apply_wrench = rospy.ServiceProxy(<span class="string">'gazebo/apply_body_wrench'</span>, ApplyBodyWrench)</span><br><span class="line"><span class="comment">#删除小球</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/delete_model'</span>)</span><br><span class="line">deletesrv = rospy.ServiceProxy(<span class="string">'gazebo/delete_model'</span>, DeleteModel)</span><br><span class="line"><span class="comment">#得到小球位置</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/get_model_state'</span>)</span><br><span class="line">get_m_state = rospy.ServiceProxy(<span class="string">'gazebo/get_model_state'</span>, GetModelState)</span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">	spawn_model_prox(<span class="string">"my_ball"</span>, sdff, <span class="string">"robotos_name_space"</span>, initial_pose, <span class="string">"world"</span>)</span><br><span class="line">	time.sleep(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">	apply_wrench(<span class="string">"my_ball::ball"</span>, <span class="string">"world"</span>, <span class="literal">None</span>, initial_wrench, rospy.Time.from_sec(<span class="number">0</span>), rospy.Duration.from_sec(<span class="number">0.2</span>))</span><br><span class="line">	s = get_m_state(<span class="string">"my_ball"</span>,<span class="string">"world"</span>)</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">		<span class="keyword">if</span>(s.pose.position.x &lt; <span class="number">6</span>):</span><br><span class="line">			s = get_m_state(<span class="string">"my_ball"</span>,<span class="string">"world"</span>)</span><br><span class="line">			print(s.pose.position.x)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			rospy.wait_for_service(<span class="string">'gazebo/delete_model'</span>)</span><br><span class="line">			deletesrv = rospy.ServiceProxy(<span class="string">'gazebo/delete_model'</span>, DeleteModel)</span><br><span class="line">			ass = deletesrv(<span class="string">"my_ball"</span>)</span><br><span class="line">			print(ass)			</span><br><span class="line">			<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
-
-<p>关于程序中各个服务的的调用方法，可以直接参考相关的消息和服务文档。</p>
-<p>最后，可以加上一个球场，改变网球的形状，使仿真环境更加逼真。这需要我们自己去创建自己的模型。<br>突然发现经常出现小球删除不掉的情况，会出现<br>DeleteModel: Model pushed to delete queue, but delete service timed out waiting for<br>  \ model to disappear from simulation”<br>调试了好久也没找出问题。有人说是gazebo的bug，真是迷了。。。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/01/ros学习/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/12/01/ros学习/" itemprop="url">Untitled</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-01T12:16:09+08:00">
-                2019-12-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/11/19/ROS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/11/19/ROS/" itemprop="url">ros笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-11-19T21:18:17+08:00">
-                2019-11-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>#小问题<br>1.在launch文件中，node标签内，type = 可执行文件（对于c++,直接talker,因为编译完成后talker就是可执行文件，而对于Python文件，应该是python.py）<br>2.如何给例程中的两个整数相加服务，使用launch文件，因为client需要两个输入，所以问题是，如何在launch文件中添加这两个输入。<br>3.python 文件添加可执行权限可以直接右键-&gt;权限去选择，也可以使用命令行 chmod +x client.py<br>4.ros中消息的使用<br>    pointstamped ps<br>    ps.point.x<br>    ps.header.stamp(这是时间戳格式)而时间戳格式又包括两个属性，分别是<br>    ps.header.stamp.secs和ps,header.stamp.nsecs</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/09/20/c++常用代码段/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/09/20/c++常用代码段/" itemprop="url">c++常用代码段</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-09-20T08:57:43+08:00">
-                2019-09-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <hr>
-<h2 id="c-c-计时函数-clock"><a href="#c-c-计时函数-clock" class="headerlink" title="c/c++计时函数 clock()"></a>c/c++计时函数 clock()</h2><p>在 #include&lt;time.h&gt;中，有个计时函数clock(),其返回的输出类型为clock_t类型。返回从“开启这个程序进程”到“程序中调用clock()函数”时 之间的CPU时钟计时单元（clock tick）数。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">clock_t</span> currentime;<span class="comment">//整数</span></span><br><span class="line">currentime = clock();<span class="comment">//返回当前程序运行计时单元数。</span></span><br></pre></td></tr></table></figure>
-
-<p>在time.h文件中，还定义了一个常量CLOCKS_PER_SEC，它用来表示一秒钟会有多少个时钟计时单元，其定义如下：</p>
-<p>  #define CLOCKS_PER_SEC ((clock_t)1000) </p>
-<p> 可以看到可以看到每过千分之一秒（1毫秒）， 调用clock（）函数返回的值就加1。即可以认为该clock()函数返回的时间单位是毫秒。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1540,7 +1685,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

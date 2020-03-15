@@ -229,6 +229,648 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/10/ros在同一节点同时订阅和发布消息/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/10/ros在同一节点同时订阅和发布消息/" itemprop="url">ros在同一节点同时订阅和发布消息</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-10T17:21:49+08:00">
+                2019-12-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>ROS版本： <em>ROS</em> Kinetic </p>
+<p>操作系统：Ubuntu16.04 LTS</p>
+<h1 id="方法一，采用类的方法"><a href="#方法一，采用类的方法" class="headerlink" title="方法一，采用类的方法"></a>方法一，采用类的方法</h1><p>参考网站<br><a href="https://blog.csdn.net/ethan_guo/article/details/80226121" target="_blank" rel="noopener">https://blog.csdn.net/ethan_guo/article/details/80226121</a><br>当然也可以用python 实现，我们与例程中的方法为例，这里只谈如何实现在类的订阅并讨论其机制。telker代码不变：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># license removed for brevity</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">talker</span><span class="params">()</span>:</span></span><br><span class="line">    pub = rospy.Publisher(<span class="string">'hello'</span>, String, queue_size=<span class="number">1</span>)</span><br><span class="line">    rospy.init_node(<span class="string">'talker'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rate = rospy.Rate(<span class="number">10</span>) <span class="comment"># 10hz</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">        hello_str = <span class="string">"hello world %s"</span> % rospy.get_time()</span><br><span class="line">        rospy.loginfo(hello_str)</span><br><span class="line">        pub.publish(hello_str)</span><br><span class="line">        rate.sleep()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        talker()</span><br><span class="line">    <span class="keyword">except</span> rospy.ROSInterruptException:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>以下是listener 代码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"class comeing!"</span>)</span><br><span class="line">        rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">        rospy.Subscriber(<span class="string">"hello"</span>, String, self.callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(self,data)</span>:</span></span><br><span class="line">        rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">	print(<span class="string">"call back comeing!"</span>)</span><br><span class="line">        pub.publish(data.data)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br><span class="line">    print(<span class="string">"class circulation!!"</span>)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
+
+<p>执行这两端代码，观察输出，可以发现只有在启动时，会执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(&quot;call back comeing!&quot;)</span><br><span class="line">print(&quot;class comeing!&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>这两段代码，而回调函数中的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print(&quot;call back comeing!&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>会在每次订阅到发布的消息后执行，这里就涉及到rospy.spin()的工作机制，它并不是一直循环这个listener()类。而是循环进入类后的订阅函数，这个函数叫做ROS消息回调处理函数。可以参考官方网站查看其具体原理。</p>
+<p>到这里其实还有一个小问题，那就是关于画图，如果我们想在回调函数中实现画图，或者在回调函数中修改变量的值，而在类的构造函数中执行与此变量有关的操作，那么我们只需要在类中加一个循环即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">"class comeing!"</span>)</span><br><span class="line">        self.da = []</span><br><span class="line">        rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">        rospy.Subscriber(<span class="string">"hello"</span>, String, self.callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">        <span class="comment">#############加入的循环####################</span></span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">	    print(self.da)<span class="comment">#此处可以是画图的语句</span></span><br><span class="line">        <span class="comment">##########################################</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(self,data)</span>:</span></span><br><span class="line">        rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">	self.da = data.data</span><br><span class="line">	print(<span class="string">"call back comeing!"</span>)</span><br><span class="line">        pub.publish(data.data)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br><span class="line">    print(<span class="string">"class circulation!!"</span>)</span><br><span class="line">    rospy.spin()</span><br></pre></td></tr></table></figure>
+
+<p>这时候可以发现，回调函数中得到的变量在构造函数的循环中执行了。实时画图在后面的文章中讨论。</p>
+<h1 id="方法二，全局变量"><a href="#方法二，全局变量" class="headerlink" title="方法二，全局变量"></a>方法二，全局变量</h1><p>下面介绍一下Python中用全局变量的方法实现.<br>以ros wiki上面的话题通信教程为例。<br><a href="http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29" target="_blank" rel="noopener">http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29</a><br>这里定义了talker 和 listener :<br>talker:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># license removed for brevity</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">talker</span><span class="params">()</span>:</span></span><br><span class="line">    pub = rospy.Publisher(<span class="string">'pub1'</span>, String, queue_size=<span class="number">1</span>)</span><br><span class="line">    rospy.init_node(<span class="string">'talker'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rate = rospy.Rate(<span class="number">10</span>) <span class="comment"># 10hz</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> rospy.is_shutdown():</span><br><span class="line">        hello_str = <span class="string">"hello world %s"</span> % rospy.get_time()</span><br><span class="line">        rospy.loginfo(hello_str)</span><br><span class="line">        pub.publish(hello_str)</span><br><span class="line">        rate.sleep()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        talker()</span><br><span class="line">    <span class="keyword">except</span> rospy.ROSInterruptException:</span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>这里我么修改listener,在文件中加入了一个全局变量pub，然后直接将订阅的话题通过<br>pub再次发布出去，当然，这里只是个测试，实际中肯定是对该消息进行处理后再发布的，写改后的listener如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">pub = rospy.Publisher(<span class="string">'pub_with_sub'</span>, String, queue_size=<span class="number">10</span>)  <span class="comment">#发布话题设为全局变量</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(data)</span>:</span></span><br><span class="line">    rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line">    pub.publish(data.data)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rospy.Subscriber(<span class="string">"pub1"</span>, String, callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br></pre></td></tr></table></figure>
+
+<p>这时，我们像教程中一样运行这两个程序结果并没有什么区别，但如果我们用rostopic list 查看，就会发现比原教程中多了一个话题，就是问在listener中发布的，接下来，我们创建一个listen_listener.py的文件来订阅这个话题：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> std_msgs.msg <span class="keyword">import</span> String</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">callback</span><span class="params">(data)</span>:</span></span><br><span class="line">    rospy.loginfo( <span class="string">"I heard %s"</span>, data.data)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">listener</span><span class="params">()</span>:</span></span><br><span class="line">    rospy.init_node(<span class="string">'listener'</span>, anonymous=<span class="literal">True</span>)</span><br><span class="line">    rospy.Subscriber(<span class="string">"pub_with_sub"</span>, String, callback,queue_size = <span class="number">1</span>)</span><br><span class="line">    <span class="comment"># spin() simply keeps python from exiting until this node is stopped</span></span><br><span class="line">    rospy.spin()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    listener()</span><br></pre></td></tr></table></figure>
+
+<p>ok,别忘了将文件设置为可执行文件，这是后，我们同时打开这三个文件。会发现显示同样的内容。实际上是这样一个结构：<br>talker发布-&gt;listener订阅　再发布　－&gt; listen_listener再订阅！</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/07/gazebo发球实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/07/gazebo发球实现/" itemprop="url">gazebo和ros通信实现发球</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-07T11:56:42+08:00">
+                2019-12-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>YouTube上有一个视频，是一个乒乓球机器人在gazebo里面的方针<br><a href="https://www.youtube.com/watch?v=HBNGeYZKJM4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=HBNGeYZKJM4</a><br>因为项目需要，需要实现这个发球的装置。因为第一次接触gazebo和ros所以这里把自己的研究过程记录下来。</p>
+<h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>1.ros的安装和通信机制，主要是话题和服务通信。<br>    这里只需要根据根据ros wiki上的教程实现前20讲，就可以实现安装（包括gazebo_ros包）和简单入门。<br>    <a href="http://wiki.ros.org/ROS/Tutorials" target="_blank" rel="noopener">http://wiki.ros.org/ROS/Tutorials</a><br>2.gazebo的一些基础知识（非必须），这里可以看一下gazebo的入门教程<br><a href="http://gazebosim.org/tutorials" target="_blank" rel="noopener">http://gazebosim.org/tutorials</a></p>
+<h2 id="总体实现思路"><a href="#总体实现思路" class="headerlink" title="总体实现思路"></a>总体实现思路</h2><p>整个方针的实现可以分为以下几步：</p>
+<p>###环境的搭建<br>这里我们并不采用gazebo教程里面直接gui插入模型的方法，而是采用ros和gazebo的通信机制实现。如果我们按前面的方法正确安装了ros。接下来，打开终端，依次执行下列命令，每个命令可以打开一个终端<br>$roscore<br>$rosrun gazebo_ros gazebo<br>这事我们就打开了gazebo界面。接下来，我们需要一个小球.<br>$rosrun gazebo_ros spawn_model -database robocup_spl_ball -sdf -model my_ball1<br>ok,那么现在我们已经把所有需要的模型加载进来了（虽然就1个球）<br>参考网站：<a href="http://gazebosim.org/tutorials/?tut=ros_comm" target="_blank" rel="noopener">http://gazebosim.org/tutorials/?tut=ros_comm</a></p>
+<p>###动起来<br>如果仔细看了上面的教程和参考网站，那我们就会有一个整体的思路：利用gazebo提供的话题和服务就可以实现,在环境的搭建中，我们是直接采用spawn_sdf_model服务实现的模型的加载。接下来我们需要把加载的网球删除。接着实现流程如下：<br>1.使用spawn_sdf_model服务加载一个网球，并指定小球的位置<br>2.使用apply_body_wrench服务，给网球施加一个斜向上的力，使其做斜抛运动<br>3.当球弹出后，进入while循环，使用get_model_state服务得到小球的位置，当小球位置飞出预定轨迹后，跳出循环。<br>4.使用delete_model服务将这个小球删除，回到1.<br>程序如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> rospy</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> SpawnModel</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> DeleteModel</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> ApplyBodyWrench</span><br><span class="line"><span class="keyword">from</span> gazebo_msgs.srv <span class="keyword">import</span> GetModelState</span><br><span class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Pose</span><br><span class="line"><span class="keyword">from</span> geometry_msgs.msg <span class="keyword">import</span> Wrench</span><br><span class="line"><span class="comment">#初始位置</span></span><br><span class="line">initial_pose = Pose()</span><br><span class="line">initial_pose.position.x = <span class="number">-4</span></span><br><span class="line">initial_pose.position.y = <span class="number">-1</span></span><br><span class="line">initial_pose.position.z = <span class="number">1</span></span><br><span class="line"><span class="comment">#所用力的大小</span></span><br><span class="line">initial_wrench = Wrench()</span><br><span class="line">initial_wrench.force.x = <span class="number">0.16</span></span><br><span class="line">initial_wrench.force.y = <span class="number">0.0</span></span><br><span class="line">initial_wrench.force.z = <span class="number">0.25</span></span><br><span class="line"><span class="comment">#ctrl+h显示隐藏文档，将XXX替换为自己的目录，从自己的目录中找的这个文件</span></span><br><span class="line">f = open(<span class="string">'/home/XXXXX/.gazebo/models/robocup_spl_ball/model.sdf'</span>,<span class="string">'r'</span>)</span><br><span class="line">sdff = f.read()</span><br><span class="line"><span class="comment">#产生小球的服务</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/spawn_sdf_model'</span>)</span><br><span class="line">spawn_model_prox = rospy.ServiceProxy(<span class="string">'gazebo/spawn_sdf_model'</span>, SpawnModel)</span><br><span class="line"><span class="comment">#施加一个作用力</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/apply_body_wrench'</span>)</span><br><span class="line">apply_wrench = rospy.ServiceProxy(<span class="string">'gazebo/apply_body_wrench'</span>, ApplyBodyWrench)</span><br><span class="line"><span class="comment">#删除小球</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/delete_model'</span>)</span><br><span class="line">deletesrv = rospy.ServiceProxy(<span class="string">'gazebo/delete_model'</span>, DeleteModel)</span><br><span class="line"><span class="comment">#得到小球位置</span></span><br><span class="line">rospy.wait_for_service(<span class="string">'gazebo/get_model_state'</span>)</span><br><span class="line">get_m_state = rospy.ServiceProxy(<span class="string">'gazebo/get_model_state'</span>, GetModelState)</span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">	spawn_model_prox(<span class="string">"my_ball"</span>, sdff, <span class="string">"robotos_name_space"</span>, initial_pose, <span class="string">"world"</span>)</span><br><span class="line">	time.sleep(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">	apply_wrench(<span class="string">"my_ball::ball"</span>, <span class="string">"world"</span>, <span class="literal">None</span>, initial_wrench, rospy.Time.from_sec(<span class="number">0</span>), rospy.Duration.from_sec(<span class="number">0.2</span>))</span><br><span class="line">	s = get_m_state(<span class="string">"my_ball"</span>,<span class="string">"world"</span>)</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>):</span><br><span class="line">		<span class="keyword">if</span>(s.pose.position.x &lt; <span class="number">6</span>):</span><br><span class="line">			s = get_m_state(<span class="string">"my_ball"</span>,<span class="string">"world"</span>)</span><br><span class="line">			print(s.pose.position.x)</span><br><span class="line">		<span class="keyword">else</span>:</span><br><span class="line">			rospy.wait_for_service(<span class="string">'gazebo/delete_model'</span>)</span><br><span class="line">			deletesrv = rospy.ServiceProxy(<span class="string">'gazebo/delete_model'</span>, DeleteModel)</span><br><span class="line">			ass = deletesrv(<span class="string">"my_ball"</span>)</span><br><span class="line">			print(ass)			</span><br><span class="line">			<span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+<p>关于程序中各个服务的的调用方法，可以直接参考相关的消息和服务文档。</p>
+<p>最后，可以加上一个球场，改变网球的形状，使仿真环境更加逼真。这需要我们自己去创建自己的模型。<br>突然发现经常出现小球删除不掉的情况，会出现<br>DeleteModel: Model pushed to delete queue, but delete service timed out waiting for<br>  \ model to disappear from simulation”<br>调试了好久也没找出问题。有人说是gazebo的bug，真是迷了。。。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/01/ros学习/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/01/ros学习/" itemprop="url">Untitled</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-12-01T12:16:09+08:00">
+                2019-12-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/11/19/ROS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/11/19/ROS/" itemprop="url">ros笔记</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-11-19T21:18:17+08:00">
+                2019-11-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="小问题"><a href="#小问题" class="headerlink" title="小问题"></a>小问题</h1><p>1.在launch文件中，node标签内，type = 可执行文件（对于c++,直接talker,因为编译完成后talker就是可执行文件，而对于Python文件，应该是python.py）<br>2.python 文件添加可执行权限可以直接右键-&gt;权限去选择，也可以使用命令行 chmod +x client.py<br>3.ros中消息的使用<br>    pointstamped ps<br>    ps.point.x<br>    ps.header.stamp(这是时间戳格式)而时间戳格式又包括两个属性，分别是<br>    ps.header.stamp.secs和ps,header.stamp.nsecs</p>
+<p>其余的消息都可以查找其文档说明。    </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/09/20/c++常用代码段/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="chono challenge">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/20/c++常用代码段/" itemprop="url">c++常用代码段</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-09-20T08:57:43+08:00">
+                2019-09-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h2 id="c-c-计时函数-clock"><a href="#c-c-计时函数-clock" class="headerlink" title="c/c++计时函数 clock()"></a>c/c++计时函数 clock()</h2><p>在 #include&lt;time.h&gt;中，有个计时函数clock(),其返回的输出类型为clock_t类型。返回从“开启这个程序进程”到“程序中调用clock()函数”时 之间的CPU时钟计时单元（clock tick）数。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">clock_t</span> currentime;<span class="comment">//整数</span></span><br><span class="line">currentime = clock();<span class="comment">//返回当前程序运行计时单元数。</span></span><br></pre></td></tr></table></figure>
+
+<p>在time.h文件中，还定义了一个常量CLOCKS_PER_SEC，它用来表示一秒钟会有多少个时钟计时单元，其定义如下：</p>
+<p>  #define CLOCKS_PER_SEC ((clock_t)1000) </p>
+<p> 可以看到可以看到每过千分之一秒（1毫秒）， 调用clock（）函数返回的值就加1。即可以认为该clock()函数返回的时间单位是毫秒。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/08/23/visual_studio2017/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -840,620 +1482,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/27/处理器_cache/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/27/处理器_cache/" itemprop="url">处理器——cache结构</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-27T10:41:17+08:00">
-                2019-06-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在内存到cache的映射中，index指的是cache的地址而tag是高位，由于内存容量比cache大而产生的。</p>
-<p>问题1：对于32位的地址，tag+index+block_words(块中字数)+word_bytes(自种字节偏移)中，所能表示的地址也只有2^32个。那么，上G的内存是如何分配的？上T的硬盘呢？</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/24/视觉杂记/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/24/视觉杂记/" itemprop="url">视觉杂记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-24T19:27:34+08:00">
-                2019-06-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>OpenCV里 RGB 图像里存储颜色顺序其实是BGR</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/20/zed立体相机使用/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/20/zed立体相机使用/" itemprop="url">zed相机使用</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-20T23:02:50+08:00">
-                2019-06-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="zed立体相机-pyhon-opencv"><a href="#zed立体相机-pyhon-opencv" class="headerlink" title="zed立体相机+pyhon+opencv"></a>zed立体相机+pyhon+opencv</h1><p>zed相机网上资料都是关于安装的教程，后续的一些使用介绍的不是很多，<br>因为官方文档已经介绍的很详细，这里介绍一下自己的学习过程，以备查阅，如有错误，敬请指正。<br>这时官方文档，所有的信息都是根据这儿得来的。<br><a href="https://www.stereolabs.com/" target="_blank" rel="noopener">https://www.stereolabs.com/</a></p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>因为zed相机属于UVC（USB video device class ）设备，索引可以用作双目摄像头直接用于计算机或者嵌入式平台，和普通的双目摄像头应该没什么区别。<br>但是如果要使用其SDK，就需要cuda环境。一开始不知道，打算用在台式机（Intel HD Graphics 4600集成显卡）上，后来发现需要NVIDIA。只好转用我的T470（总算能干点活了）。按照这个教程下来，基本没问题。<br><a href="https://blog.csdn.net/weixin_42132223/article/details/81840520" target="_blank" rel="noopener">https://blog.csdn.net/weixin_42132223/article/details/81840520</a></p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>安装后在程序里面搜索zed,会发现多出几个应用。可以都打开看看（别忘了把zed相机插上）。其中zed viewer就是拍摄的图像，左下角可以看到可以录视频照相。但录的视频是SVO格式的。里面包含了很多信息。包括深度，点云什么的，所以会非常大。depth viewer可以看深度图像和点云。ZED calibratiuon是做标定的很方便，不用自己搞棋盘，直接拿摄像头去怼显示前上的该应用给的棋盘就行，这里建议用大一点的显示器。先看一下教程不是很难。还有一个ZEDFu我没用到。</p>
-<p>以上的这些应用只能让我们看到ZED的一些功能。用来做开发，自然少不了SDK.花一个小时把这个文档大概看一些。基本上就可以上手开发了。<br><a href="https://www.stereolabs.com/docs/getting-started/" target="_blank" rel="noopener">https://www.stereolabs.com/docs/getting-started/</a></p>
-<h2 id="方便参考的一些点"><a href="#方便参考的一些点" class="headerlink" title="方便参考的一些点"></a>方便参考的一些点</h2><p>zed相机比较方便的一个点是，做实时分析的时候不用随时都要插着摄像头，可以先录制好获得svo文件，然后用grab()函数直接得到的就是矫正后的图像，当然也可以参考给的opnecv例程进行图像，视频还有点云文件的保存。</p>
-<p>因为我要识别网球。很小，距离也很远。一开始打算用点云去做，滤波后提取满足条件的聚类。但PCL库没接触过。后来看到这篇文章<br><a href="https://support.stereolabs.com/hc/en-us/articles/360011977594-Can-I-get-the-3D-position-of-a-Custom-Object-a-Ball-or-a-Small-Object-" target="_blank" rel="noopener">https://support.stereolabs.com/hc/en-us/articles/360011977594-Can-I-get-the-3D-position-of-a-Custom-Object-a-Ball-or-a-Small-Object-</a><br>我在深度图中也看不到飞行的网球，zed开发人员也不建议直接用从深度图中去找。深度图是立体矫正匹配后得到的。于是我直接从矫正后的图像中去找两个球的对应点，得到视差。最后计算出三维坐标值。</p>
-<h2 id="zed录像保存为svo文件的问题"><a href="#zed录像保存为svo文件的问题" class="headerlink" title="zed录像保存为svo文件的问题"></a>zed录像保存为svo文件的问题</h2><p>因为我需要的帧率比较高，而且在关键时刻需要稳定，但是得到的svo文件打开时（需要SDK），发现帧率一直在变化，而且某些帧率变得很低，不太清楚为什么。一下是我录制是的代码。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> pyzed.sl <span class="keyword">as</span> sl</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a ZEDCamera object</span></span><br><span class="line">zed = sl.Camera()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a InitParameters object and set configuration parameters</span></span><br><span class="line">init_params = sl.InitParameters()</span><br><span class="line">init_params.camera_resolution = sl.RESOLUTION.RESOLUTION_HD720  <span class="comment">#分辨率设置</span></span><br><span class="line">init_params.camera_fps = <span class="number">60</span>                                     <span class="comment">#帧率设置</span></span><br><span class="line"></span><br><span class="line">err = zed.open(init_params)</span><br><span class="line"><span class="keyword">if</span> err != sl.ERROR_CODE.SUCCESS:</span><br><span class="line">    exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">runtime_parameters = sl.RuntimeParameters()</span><br><span class="line">runtime_parameters.sensing_mode = sl.SENSING_MODE.SENSING_MODE_STANDARD  <span class="comment"># Use STANDARD sensing mode</span></span><br><span class="line"><span class="comment"># Enable recording with the filename specified in argument</span></span><br><span class="line">err = zed.enable_recording(<span class="string">'video_frame_test.svo'</span>, sl.SVO_COMPRESSION_MODE.SVO_COMPRESSION_MODE_LOSSLESS)</span><br><span class="line">image_zed = sl.Mat(zed.get_resolution().width, zed.get_resolution().height, sl.MAT_TYPE.MAT_TYPE_8U_C4)</span><br><span class="line">point_cloud = sl.Mat()</span><br><span class="line"></span><br><span class="line">print(<span class="string">'SVO is Recording'</span>)</span><br><span class="line">n=<span class="number">200</span></span><br><span class="line">pretimestamp=<span class="number">0</span></span><br><span class="line">dif_time =[]</span><br><span class="line"><span class="keyword">while</span> n&gt;<span class="number">0</span>:</span><br><span class="line">    <span class="keyword">if</span> zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS :</span><br><span class="line">        <span class="comment"># Each new frame is added to the SVO file</span></span><br><span class="line">        zed.record()</span><br><span class="line">        zed.retrieve_image(image_zed, sl.VIEW.VIEW_LEFT)</span><br><span class="line">        timestamp = zed.get_timestamp(sl.TIME_REFERENCE.TIME_REFERENCE_CURRENT)  <span class="comment"># Get the timestamp at the time the image was captured</span></span><br><span class="line">        diftimestamp = timestamp - pretimestamp<span class="comment">#时间戳之差</span></span><br><span class="line">        pretimestamp = timestamp<span class="comment">#上一帧时间戳</span></span><br><span class="line">        <span class="comment">#n = n-1</span></span><br><span class="line">        print(diftimestamp)</span><br><span class="line">        dif_time.append(diftimestamp)<span class="comment">#保存于一个列表</span></span><br><span class="line">        <span class="comment">#print(n)</span></span><br><span class="line"><span class="comment">#    else:</span></span><br><span class="line"><span class="comment">#         key =cv2.waitKey(1)</span></span><br><span class="line"><span class="comment">#         print('jump.')</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Disable recording</span></span><br><span class="line">zed.disable_recording()</span><br><span class="line">zed.close()</span><br></pre></td></tr></table></figure>
-
-<p>这里要实名表扬zed的技术支持。发送了询问邮件很快就得到了恢复。最终找到了问题所在。<br>因为我在thinkpad T470P上使用的该摄像头。技术支持说可能是因为GeForce 940MX不支持在最大帧率下工作。后来我进行了一些实验。发现在720P下，设置为15帧和30帧基本上不会有掉帧。但在60帧时就比较严重。所以我猜想可能是因为这个问题。另外，在720p时，即使调用SDK也不能设置任意帧数，好像只有，15，30，60三个选项。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/19/点云相关/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/19/点云相关/" itemprop="url">点云相关</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-19T08:48:46+08:00">
-                2019-06-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最近在做双目实际，涉及到一些点云相关的内容，不太懂。先记录一下参考网站。以后学习的话可能用得到</p>
-<p>1.知乎上的一个参考：<br><a href="https://zhuanlan.zhihu.com/p/50915322" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/50915322</a><br>2.这个社区有大量的资料<br><a href="http://www.pclcn.org/bbs/forum.php" target="_blank" rel="noopener">http://www.pclcn.org/bbs/forum.php</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/17/视频处理常用python代码组/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="chono challenge">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/06/17/视频处理常用python代码组/" itemprop="url">视频处理常用python代码段</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-17T19:37:34+08:00">
-                2019-06-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="视频处理常用python代码段"><a href="#视频处理常用python代码段" class="headerlink" title="视频处理常用python代码段"></a>视频处理常用python代码段</h1><p>直接参考网站：<br><a href="http://zhaoxuhui.top/blog/2017/05/05/%E5%9F%BA%E4%BA%8EPython%E7%9A%84OpenCV%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%863.html" target="_blank" rel="noopener">http://zhaoxuhui.top/blog/2017/05/05/%E5%9F%BA%E4%BA%8EPython%E7%9A%84OpenCV%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%863.html</a></p>
-<p>刚开始写入视频一直失败，显示avi文件只有6kb,经过分析和网上查找，有以下几个可能问题：<br>1.网上很多人说的尺寸的问题，图片尺寸一定要对应<br>2.刚开始在台式机上没问题，后来在笔记本上就打不开，后来发现是我每次写完视频马上打开，这时文件还没完全写入，需要等一段时间。另一个问题是python没有释放文件。这时关闭编译器后，发现视频可以正常打开，着说明代码最后没有加上videoWriter.release这一语句。<br>3.以上是我尝试各种方法遇到的问题。但对于我的代码不知道为什么一直写不进去，无论如何都是6kb.最后发现如果把图片先保存，在读入，再写就可以，如下代码。我也不清楚为什么。不过暂时是把问题解决，可以进行视频演示了。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cv2.imwrite(<span class="string">"image.jpg"</span>,frame)</span><br><span class="line">temp=cv2.imread(<span class="string">'image.jpg'</span>)</span><br><span class="line">videoWriter.write(temp)</span><br></pre></td></tr></table></figure>
-
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1504,7 +1532,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
